@@ -1,3 +1,4 @@
+/* $ID$ */
 /*
  *  1999.3.27
  *  ヒットした件数が30件以上だったら showエントリには30を入力するように変更 
@@ -9,11 +10,11 @@
  */
 
 /*
- * Copyright (c) 1995-1998, Index Data.
- * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
+ * Revision 1.1.1.1  1999/09/05 05:30:29  masao
+ * first version on CVS.
+ * all files are imported.
  *
- * $Log$
+ *
  * Revision 1.60  1998/01/29 14:08:52  adam
  * Better sort diagnostics.
  *
@@ -237,10 +238,9 @@
 #include <tk.h>
 #include <stdarg.h>
 
-#include "version.h"
-
 #define TMPDIR "/tmp"
 #define PROGNAME "kappa"
+#define CLIENT_NAME "Kappa"
 
 /* TclTk */
 static char *TclCmdName = "TclClientCommand";

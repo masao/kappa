@@ -1,0 +1,193 @@
+dnl
+dnl configure.in for kappa
+dnl
+dnl Created by masao@ulis.ac.jp (Masao Takaku) [1999-09-05]
+dnl
+
+dnl
+AC_INIT(client.c)
+
+dnl
+dnl ------ Substitutions
+AC_SUBST(CC)
+AC_SUBST(TCLLIB)
+AC_SUBST(TKLIB)
+AC_SUBST(TCLINC)
+AC_SUBST(TKINC)
+AC_SUBST(YAZDIR)
+
+dnl
+dnl ------ Preliminary settings
+AC_PROG_CC
+AC_STDC_HEADERS
+if test "$ac_cv_header_stdc" = no; then
+	AC_MSG_WARN(Your system doesn't seem to support ANSI C)
+fi
+
+dnl ------ look for YAZ
+dnl
+AC_MSG_CHECKING(for YAZ directory)
+AC_ARG_WITH(
+	yazdir,
+	[  --with-yazdir=DIR       Yaz directory],
+	[YAZDIR=$withval]
+)
+if test "$YAZDIR" = "yes"; then
+	YAZDIR="../yaz-1.4"
+elif test "$YAZDIR" = ""; then
+	YAZDIR=../yaz
+        for i in ../yaz* ../yaz; do
+            if test -d $i; then
+                YAZDIR=$i
+            fi
+        done
+fi
+if test ! -d $YAZDIR; then
+	AC_MSG_WARN(YAZ directory ${YAZDIR} doesn't exist)
+else
+	AC_MSG_RESULT($YAZDIR)
+fi
+
+dnl
+dnl ------ look for Tcl/Tk
+dnl
+AC_ARG_WITH(
+	tcltkdir,
+	[  --with-tcltkdir=DIR     set prefix for Tcl/Tk library],
+	[tcltkprefix=${withval}],
+	[tcltkprefix='/usr/local']
+)
+tryprefix=${tcltkprefix}
+if test -r ${tryprefix}/lib/tclConfig.sh; then
+	AC_MSG_CHECKING(for Tcl)
+	. ${tryprefix}/lib/tclConfig.sh
+	TCLLIB="${TCL_LIB_SPEC} ${TCL_LIBS}"
+	TCLINC=-I${TCL_PREFIX}/include
+	RANLIB=$TCL_RANLIB
+	AC_MSG_RESULT($TCL_VERSION)
+else
+	AC_PROG_RANLIB
+	checkBoth=0
+	AC_CHECK_FUNC(connect, tk_checkSocket=0, tk_checkSocket=1)
+	if test "$tk_checkSocket" = 1; then
+		AC_CHECK_LIB(socket, main, LIBS="$LIBS -lsocket", checkBoth=1)
+	fi
+	if test "$checkBoth" = 1; then
+		tk_oldLibs=$LIBS
+		LIBS="$LIBS -lsocket -lnsl"
+		AC_CHECK_FUNC(accept, , [LIBS=$tk_oldLibs])
+	fi
+	AC_CHECK_FUNC(gethostbyname, , AC_CHECK_LIB(nsl, main, [LIBS="$LIBS -lnsl"]))
+	AC_MSG_CHECKING(for Tcl)
+	TCL_VERSION=nope
+	for i in "" 7.4 7.5 7.6 8.0; do
+		if test -r ${tryprefix}/lib/libtcl${i}.a; then
+			TCL_VERSION=$i
+		fi
+	done
+	if test "$TCL_VERSION" = nope; then
+		AC_MSG_WARN(Didn't find Tcl)
+		TCL_LIB_SPEC=-ltcl
+		TCLINC=" # -I.. Tcl/Tk include path"
+	else
+		if test "$TCL_VERSION" = ""; then
+			AC_MSG_RESULT(7.3)
+		else
+			AC_MSG_RESULT($TCL_VERSION)
+		fi
+		TCL_LIB_SPEC=${tryprefix}/lib/libtcl${TCL_VERSION}.a
+		TCLINC=-I${tryprefix}/include
+	fi
+	TCLLIB="${TCL_LIB_SPEC} ${LIBS} -lm"
+fi
+
+dnl 
+dnl ------ look for Tk
+dnl
+if test -r ${tryprefix}/lib/tkConfig.sh; then
+	AC_MSG_CHECKING(for Tk)
+	. ${tryprefix}/lib/tkConfig.sh
+	AC_MSG_RESULT($TK_VERSION)
+	TKINC=${TK_XINCLUDES}
+	TKLIB="${TK_LIB_SPEC} ${TCL_LIB_SPEC} ${TK_LIBS}"
+	IRCLIENT_SHELL=wish${TK_VERSION}
+else
+	AC_MSG_CHECKING(for Tk)
+	TK_VERSION=nope
+	for i in "" 4.0 4.1 4.2 8.0; do
+		if test -r ${tryprefix}/lib/libtk${i}.a; then
+			TK_VERSION=$i
+		fi
+	done
+	if test "$TK_VERSION" = nope; then
+		AC_MSG_WARN(Didn't find Tk)
+		TKLIB=-ltk
+	else
+		TKLIB=${tryprefix}/lib/libtk${TK_VERSION}.a
+		if test "$TK_VERSION" = ""; then
+			AC_MSG_RESULT(3.x)
+		else
+			AC_MSG_RESULT($TK_VERSION)
+		fi
+	fi
+	AC_PATH_X
+	not_really_there=""
+	if test "$no_x" = ""; then
+		if test "$x_includes" = ""; then
+			AC_TRY_CPP([#include <X11/XIntrinsic.h>], , not_really_there="yes")
+		else
+			if test ! -r $x_includes/X11/Intrinsic.h; then
+				not_really_there="yes"
+			fi
+		fi
+	fi
+	if test "$no_x" = "yes" -o "$not_really_there" = "yes"; then
+		echo checking for X11 header files
+		XINCLUDES="# no special path needed"
+		AC_TRY_CPP([#include <X11/Intrinsic.h>], , XINCLUDES="nope")
+		if test "$XINCLUDES" = nope; then dirs="/usr/unsupported/include /usr/local/include /usr/X386/include /usr/include/X11R4 /usr/X11R5/include /usr/include/X11R5 /usr/openwin/include /usr/X11/include /usr/sww/include"
+			for i in $dirs ; do
+				if test -r $i/X11/Intrinsic.h; then
+					XINCLUDES=" -I$i"
+				fi
+			done
+		fi
+	else
+		if test "$x_includes" != ""; then
+			XINCLUDES=-I$x_includes
+		else
+			XINCLUDES="# no special path needed"
+		fi
+	fi
+	if test "$XINCLUDES" = nope; then
+		echo "Warning:  couldn't find any X11 include files."
+		XINCLUDES="# no include files found"
+	fi
+	if test "$no_x" = yes; then
+		XLIBSW=nope
+		if test "$XLIBSW" = nope; then
+			dirs="/usr/unsupported/lib /usr/local/lib /usr/X386/lib /usr/lib/X11R4 /usr/X11R5/lib /usr/lib/X11R5 /usr/openwin/lib /usr/X11/lib /usr/sww/X11/lib"
+		for i in $dirs ; do
+			if test -r $i/libX11.a; then
+				XLIBSW="-L$i -lX11"
+			fi
+		done
+	fi
+	else
+		if test "$x_libraries" = ""; then
+			XLIBSW=-lX11
+		else
+			XLIBSW="-L$x_libraries -lX11"
+		fi
+	fi
+	if test "$XLIBSW" = nope ; then
+		AC_CHECK_LIB(Xwindow, XCreateWindow, XLIBSW=-lXwindow)
+	fi
+	if test "$XLIBSW" = nope ; then
+		echo "Warning:  couldn't find the X11 library archive.  Using -lX11."
+		XLIBSW=-lX11
+	fi
+	TKINC=$XINCLUDES
+	TKLIB="${TKLIB} ${XLIBSW} ${TCLLIB}"
+fi
+AC_OUTPUT(Makefile)

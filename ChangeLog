@@ -1,3 +1,10 @@
+Mon Sep  6 00:13:08 1999  Masao Takaku  <masao@dream.ipc.ulis.ac.jp>
+
+	* client.c: IDをつけて、LOGを削除。
+	* Makefile: 削除。
+	* configure,configure.in,Makefile.in: 追加。一応、autoconf化 !!!
+	* version.h: 削除。（今後、VERSIONはMakefileで設定する）
+
 Sun Sep  5 15:43:59 1999  Yuka Egusa  <yuka@dream.ipc.ulis.ac.jp>
 
 	* CVSにした

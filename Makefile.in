@@ -1,0 +1,62 @@
+# This file is made by masao@ulis.ac.jp
+
+VERSION=0.9
+
+SHELL=/bin/sh
+
+# Directory prefix with machine independent files (scripts, setup files, etc.)
+prefix = @prefix@
+
+# Directory prefix with machine dependent files (executables, libraries)
+exec_prefix = @exec_prefix@
+
+BINDIR=$(exec_prefix)/bin
+LIBDIR=$(exec_prefix)/lib
+MANDIR=$(prefix)/man
+INCDIR=$(prefix)/include
+IRTCLDIR=$(prefix)/lib/irtcl
+
+YAZDIR=@YAZDIR@
+
+CC=@CC@
+
+# Tcl libraries and include files
+TCLLIB=@TCLLIB@
+TCLINC=@TCLINC@
+
+# Tk & X11 libraries and include files
+TKLIB=@TKLIB@
+TKINC=@TKINC@
+
+# All YAZ libraries - including MOSI libraries.
+YAZLIB=$(YAZDIR)/lib/libyaz.a $(YAZDIR)/lib/ccl.a
+
+# All include paths
+INCLUDE=-I. -I$(YAZDIR)/include $(TKINC) $(TCLINC)
+DEFS=$(INCLUDE) -DCCL2RPN=1 -DCLIENT_VERSION=\"$(VERSION)\"
+CFLAGS=-g -O
+
+PROG=client
+PROGO=client.o
+
+all: kappa
+
+kappa: $(PROG)
+
+$(PROG): $(PROGO) $(LIBS)
+	$(CC) $(CFLAGS) $(INCLUDE) $(PROGO) -o $(PROG) $(YAZLIB) $(TKLIB) $(TCLLIB)
+
+.c.o:
+	$(CC) -c $(DEFS) $(CFLAGS) $<
+
+Makefile: configure Makefile.in
+	./config.status
+
+configure: configure.in
+	autoconf
+
+clean:
+	rm -f *.[oa] *~ *.bak #*# core $(PROG)
+
+distclean: clean
+	rm -f config.* Makefile

@@ -1,5 +1,8 @@
 Fri Sep 10 12:36:26 1999  Masao Takaku  <masao@ulis.ac.jp>
 
+	* client.c (display_diagrecs): データベースからのエラーメッセージ
+	をGUIで表示する。
+
 	* client.c: Cのソースを少し整理した。
 
 	* client.c: Tcl_Evalでコアダンプするバグを直した。

@@ -405,12 +405,14 @@ static void display_diagrecs(Z_DiagRec **pp, int num)
     int i;
     oident *ent;
     Z_DefaultDiagFormat *r;
+    char buf[BUFSIZE], buf2[BUFSIZE];
 
-    printf("Diagnostic message(s) from database:\n");
+    strcpy(buf, "Diagnostic message(s) from database:\n");
     for (i = 0; i<num; i++) {
 	Z_DiagRec *p = pp[i];
 	if (p->which != Z_DiagRec_defaultFormat) {
-	    printf("Diagnostic record not in default format.\n");
+	    strcat(buf, "Diagnostic record not in default format.\n");
+	    tclPrintf(buf, 2);
 	    return;
 	} else {
 	    r = p->u.defaultFormat;
@@ -418,12 +420,16 @@ static void display_diagrecs(Z_DiagRec **pp, int num)
 	if (!(ent = oid_getentbyoid(r->diagnosticSetId)) ||
 	    ent->oclass != CLASS_DIAGSET || ent->value != VAL_BIB1)
 	    printf("Missing or unknown diagset\n");
-	printf("    [%d] %s", *r->condition, diagbib1_str(*r->condition));
-	if (r->addinfo && *r->addinfo)
-	    printf(" -- '%s'\n", r->addinfo);
-	else
-	    printf("\n");
+	sprintf(buf2, "  [%d] %s", *r->condition, diagbib1_str(*r->condition));
+	strcat(buf, buf2);
+	if (r->addinfo && *r->addinfo) {
+	    sprintf(buf2, "  -- '%s'\n", r->addinfo);
+	    strcat(buf, buf2);
+	} else {
+	    strcat(buf, "\n");
+	}
     }
+    tclPrintf(buf, 2);
 }
 
 static void display_nameplusrecord(Z_NamePlusRecord *p)

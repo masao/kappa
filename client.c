@@ -1235,11 +1235,13 @@ static int client(int argc, char **argv)
 	    strcpy(host, addr);
 	    strcpy(port,"210");
 	}
-	sprintf(buf, "Searchproc \"open\" tcp:%s:%s\n", host, port);
-	strcat(buf, "wm deiconify .\n");
-	strcat(buf, "focus .entEnter.inputentry\n");
-	sprintf(buf,"wm title . \"検索画面 <%s:%s>\"\n",host, dbname);
-	Tcl_Eval(interp, buf);
+	sprintf(buf, "Searchproc \"open\" \"tcp:%s:%s\"\n", host, port);
+        sprintf(buf, "%s Searchproc \"base\" \"%s\"\n",buf, dbname);
+        strcat(buf, "wm deiconify .\n");
+        strcat(buf, "focus .entEnter.inputentry\n");
+        sprintf(buf, "%s wm title . \"検索画面 <%s:%s>\"\n",
+                buf, host, dbname);
+        Tcl_Eval(interp, buf);
     }
     
     /* Main Loop */

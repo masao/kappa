@@ -1,3 +1,10 @@
+Thu Oct 14 12:16:08 1999  Yuka Egusa  <yuka@cosmo.ulis.ac.jp>
+
+	* README: バグ情報を追加した。
+
+	* client.c: % kappa ZURLとしたときに接続せずに検索ウインドウが
+	出てしまうバグを直した。
+
 Tue Oct 12 11:35:22 1999  Yuka Egusa  <yuka@cosmo.ulis.ac.jp>
 
 	* client.c:返戻結果表示欄(listbox)での'\tを

@@ -1102,9 +1102,9 @@ else
 	echo "$ac_t""$YAZDIR" 1>&6
 fi
 
-# Check whether --with-tcldir or --without-tcldir was given.
-if test "${with_tcldir+set}" = set; then
-  withval="$with_tcldir"
+# Check whether --with-tcl-prefix or --without-tcl-prefix was given.
+if test "${with_tcl_prefix+set}" = set; then
+  withval="$with_tcl_prefix"
   tcltkprefix=${withval}
 else
   tcltkprefix='/usr/local'

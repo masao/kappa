@@ -51,7 +51,7 @@ dnl
 dnl ------ look for Tcl/Tk
 dnl
 AC_ARG_WITH(
-	tcldir,
+	tcl-prefix,
 	[  --with-tcl-prefix=DIR   set prefix for Tcl/Tk library],
 	[tcltkprefix=${withval}],
 	[tcltkprefix='/usr/local']

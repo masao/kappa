@@ -11,10 +11,9 @@ ELIBS=-lld
 ・Solaris 2.6 (nile)
 ELIBS="-lsocket -lnsl -ldl"
 
-・HP-UX 10.20 (dream) Tcl7.6jp/Tk4.2jp版
+・HP-UX 10.20 (dream)
 TCLTK_INC=/home/x/yuka/usr/local/include
 TCLTK_LIBDIR=/home/x/yuka/usr/local/lib
-TCLTK_LIBS="-ltk4.2jp -ltcl7.6jp -lX11 -lm"
 
 ・HP-UX 10.20 (dream) Tcl8.0jp/Tk8.0jp版（改行コード出るバグあり）
 TCLTK_INC=/opt/free/include

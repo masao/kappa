@@ -71,7 +71,7 @@ kappa_bin_SOURCES = client.c
 
 pkgdata_DATA = client.tcl opensite default.bib
 
-EXTRA_DIST = client.tcl opensite default.bib
+EXTRA_DIST = kappa client.tcl.in opensite default.bib
 
 # YAZ(Yet Another Toolkit) directory
 YAZDIR = @YAZDIR@

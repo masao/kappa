@@ -3,6 +3,8 @@
 ## This is a part of kappa
 ## Copyright (C) 1999, Yuka Egusa, Masao Takaku. All rights reserved.
 
+AUTOMAKE_OPTIONS = no-dependencies
+
 bin_SCRIPTS = kappa
 bin_PROGRAMS = kappa.bin
 kappa_bin_SOURCES = client.c

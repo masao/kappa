@@ -1,3 +1,8 @@
+Mon Sep 27 17:36:52 1999  Masao Takaku  <masao@ulis.ac.jp>
+
+	* Makefile.am: automakeにno-dependenciesオプションを与えるようにし
+	た。
+
 Sat Sep 25 22:20:17 1999  Masao Takaku  <masao@ulis.ac.jp>
 
 	* client.tcl.in: 追加。

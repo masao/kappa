@@ -42,7 +42,8 @@ proc errWin_open {str} {
     button .err1.fin -fg black -bg #C000DF00FF00  -text " OK ? " -command {
         destroy .err1
         #wm deiconify .topen
-        popUpOpenCmd
+	exit 1
+        #popUpOpenCmd
     }
     pack .err1.f .err1.fin
 }

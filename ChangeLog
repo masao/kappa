@@ -1,5 +1,7 @@
 Fri Sep 10 12:36:26 1999  Masao Takaku  <masao@ulis.ac.jp>
 
+	* client.tcl: 接続エラーの場合は一旦終了するようにした。
+
 	* client.c (tclPrintf): Tcl_Eval は 書き込み可能なメモリ領域を渡さ
 	ないとコアダンプする対策。
 

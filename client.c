@@ -1256,22 +1256,17 @@ tclCommandCallback( ClientData cd,int argc, char *argv[])
     int netbufferlen = 0;
     int i;
     Z_APDU *apdu;
-    char line[1024], word[1024], arg[1024];
 
-    /* while (1) */
-    {
         int res;
 
-	char line[1024], word[1024], arg[1024];       
+	char tcl_cmd[BUFSIZE];
+	char tcl_entry[BUFSIZE];
          
-	char tcl_cmdName[20];
-	char tcl_entryName[100];
+	strcpy(tcl_cmd,Tcl_GetVar(interp,"TclComandName",0));
+	strcpy(tcl_entry,Tcl_GetVar(interp,"TclEntryArg",0));
          
-	strcpy(tcl_cmdName,Tcl_GetVar(interp,"TclComandName",0));
-	strcpy(tcl_entryName,Tcl_GetVar(interp,"TclEntryArg",0));
-         
-	printf("\nコマンド名 ： %s\n", Tcl_GetVar(interp,"TclComandName",0));
-	printf("入力文字列 ： %s\n", Tcl_GetVar(interp,"TclEntryArg",0));
+	printf("\nコマンド名 ： %s\n", tcl_cmd);
+	printf("入力文字列 ： %s\n", tcl_entry);
 
 #ifdef USE_SELECT
         fd_set input;
@@ -1294,12 +1289,9 @@ tclCommandCallback( ClientData cd,int argc, char *argv[])
 	if (!wait)
 #endif
 	{
-	    strcpy(word, Tcl_GetVar(interp,"TclComandName",0));
-	    strcpy(arg, Tcl_GetVar(interp,"TclEntryArg",0));
-
 	    for (i = 0; cmd[i].cmd; i++)
-		if (!strncmp(cmd[i].cmd, word, strlen(word))) {
-                    res = (*cmd[i].fun)(arg);
+		if (!strncmp(cmd[i].cmd, tcl_cmd, strlen(tcl_cmd))) {
+                    res = (*cmd[i].fun)(tcl_entry);
                     break;
 		}
 	    if (res < 2) {
@@ -1371,17 +1363,11 @@ tclCommandCallback( ClientData cd,int argc, char *argv[])
             } while (cs_more(conn));
         }
 	wait = 0;
-    }
     return TCL_OK;
 }
 
 int main(int argc, char **argv)
 {
-    char *prog = *argv;
-    char *arg;
-    int ret;
-    int opened = 0;
-
     initialize();
     sprintf(tcldumpfilename, "%s/%s%d", TMPDIR, PACKAGE, getpid());
     cmd_base("Default");
@@ -1418,31 +1404,22 @@ void itoa(int n,char s[])
     reverse(s);
 }
 
-static int tclPrintf(char *str,int lnum)
+static int tclPrintf(char *str, int lnum)
 {
-    Tcl_SetVar(interp,"setdata", str,0);
+    char buf[BUFSIZE];
+
+    /* Tcl_SetVar(interp,"setdata", str,0); */
     if( lnum == 0){
-        Tcl_Eval(interp,".l0 insert end $setdata" );
+        sprintf(buf, ".l0 insert end {%s}", str);
     } else if(lnum == 1){
-        Tcl_Eval(interp,".l1 insert end $setdata" ); 
+        sprintf(buf, ".l1 insert end {%s}", str); 
     } else if (lnum == 2) {
-	Tcl_Eval(interp, "errWin $setdata");
-    }
-/*  else if(lnum == 2){
-        Tcl_Eval(interp,".m configure -text $setdata");
-    }
-    else if(lnum == 3){
-        Tcl_Eval(interp,".topen.m configure -text $setdata");
-        Tcl_Eval(interp,".m configure -text $setdata");
-    }
-    else if(lnum == 3){
-        Tcl_Eval(interp,".topen.m configure -text $setdata");
-    } できないみたいなので、他の方法を確認中  */
-    else if(lnum == 4){
-        Tcl_Eval(interp,"errWin_open $setdata");
-    }
-    else{
+	sprintf(buf, "errWin {%s}", str);
+    } else if(lnum == 4){
+	sprintf(buf, "errWin_open {%s}", str);
+    } else{
         printf(" tclPrintf() error lnum \n");
         exit(1);
     }
+    Tcl_Eval(interp, buf);
 }

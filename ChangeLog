@@ -1,3 +1,8 @@
+Fri Sep 10 12:36:26 1999  Masao Takaku  <masao@ulis.ac.jp>
+
+	* client.c (tclPrintf): Tcl_Eval は 書き込み可能なメモリ領域を渡さ
+	ないとコアダンプする対策。
+
 Thu Sep  9 04:46:30 1999  Masao Takaku  <masao@dream.ipc.ulis.ac.jp>
 
 	* configure.in: --with-tcl-prefix オプションをとれていないバグを直

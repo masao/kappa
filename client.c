@@ -1,4 +1,3 @@
-/* $ID$ */
 /*
  *  1999.3.27
  *  ヒットした件数が30件以上だったら showエントリには30を入力するように変更 
@@ -6,202 +5,6 @@
  *   1997.10.14
  *  Usmarc は、リストボックスに表示できるように
  *  
- *
- */
-
-/*
- * Revision 1.1.1.1  1999/09/05 05:30:29  masao
- * first version on CVS.
- * all files are imported.
- *
- *
- * Revision 1.60  1998/01/29 14:08:52  adam
- * Better sort diagnostics.
- *
- * Revision 1.59  1998/01/29 13:17:56  adam
- * Added sort.
- *
- * Revision 1.58  1998/01/07 13:51:45  adam
- * Minor change.
- *
- * Revision 1.57  1998/01/07 12:58:22  adam
- * Using fgets instead of gets.
- *
- * Revision 1.56  1997/11/05 09:18:31  adam
- * The client handles records with no associated syntax.
- *
- * Revision 1.55  1997/10/31 12:20:08  adam
- * Improved memory debugging for xmalloc/nmem.c. References to NMEM
- * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
- * Bug fix: missing fclose in data1_read_espec1.
- *
- * Revision 1.54  1997/10/27 13:52:46  adam
- * Header yaz-util includes all YAZ utility header files.
- *
- * Revision 1.53  1997/09/29 13:18:59  adam
- * Added function, oid_ent_to_oid, to replace the function
- * oid_getoidbyent, which is not thread safe.
- *
- * Revision 1.52  1997/09/29 07:20:31  adam
- * Client code uses nmem_init.
- *
- * Revision 1.51  1997/09/26 09:41:55  adam
- * Updated client to handle multiple diagnostics.
- *
- * Revision 1.50  1997/09/17 12:10:29  adam
- * YAZ version 1.4.
- *
- * Revision 1.49  1997/09/04 13:45:17  adam
- * Added UNImarc to list of available syntaxes.
- *
- * Revision 1.48  1997/09/01 08:48:44  adam
- * New windows NT/95 port using MSV5.0. Only a few changes made
- * to avoid warnings. Sub project created: client.dsp.
- *
- * Revision 1.47  1997/07/01 13:49:56  adam
- * Take care of case when invalid target is specified on command line.
- *
- * Revision 1.46  1997/06/23 10:30:18  adam
- * Added call to ccl_rpn_delete in search. Added ODR stream "out"
- * as parameter to ccl_rpn_query to release RPN query.
- *
- * Revision 1.45  1997/05/14 06:53:29  adam
- * C++ support.
- *
- * Revision 1.44  1997/05/05 11:20:35  adam
- * Client uses "options" utility and marc dump filename may be specified
- * as an option (-m <file>).
- *
- * Revision 1.43  1996/11/08 11:03:26  adam
- * Client accepts multiple database names.
- *
- * Revision 1.42  1996/10/08 10:44:57  quinn
- * Resolved conflicts.
- *
- * Revision 1.41  1996/10/07  15:29:03  quinn
- * Work
- *
- * Revision 1.40  1996/08/29  14:19:34  quinn
- * Fixed conflict (CVS)
- *
- * Revision 1.39  1996/08/27  10:43:22  quinn
- * Made select() optional
- *
- * Revision 1.38  1996/08/12  14:09:11  adam
- * Default prefix query attribute set defined by using p_query_attset.
- *
- * Revision 1.37  1996/07/06  19:58:29  quinn
- * System headerfiles gathered in yconfig
- *
- * Revision 1.36  1996/06/10  08:53:47  quinn
- * Added Summary
- *
- * Revision 1.35  1996/06/03  09:45:50  quinn
- * Added display of OIDs in the GRS routine.
- *
- * Revision 1.34  1996/05/09  07:26:49  quinn
- * *** empty log message ***
- *
- * Revision 1.33  1996/05/09  07:25:22  quinn
- * Small
- *
- * Revision 1.32  1996/03/15  11:05:33  adam
- * The user can set the preferred query type (prefix, ccl, ..) with the
- * querytype command.
- *
- * Revision 1.31  1996/02/20  12:51:54  quinn
- * Fixed problems with EXTERNAL.
- *
- * Revision 1.30  1996/02/12  18:18:09  quinn
- * Fidgeting.
- *
- * Revision 1.29  1996/01/02  08:57:25  quinn
- * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
- *
- * Revision 1.28  1995/12/14  11:09:31  quinn
- * Added Explain record syntax to the format command.
- *
- * Revision 1.27  1995/12/12  16:37:02  quinn
- * Added destroy element to data1_node.
- *
- * Revision 1.26  1995/12/12  14:11:00  quinn
- * Minimal.
- *
- * Revision 1.25  1995/11/13  09:27:22  quinn
- * Fiddling with the variant stuff.
- *
- * Revision 1.24  1995/10/30  12:41:13  quinn
- * Added hostname lookup for server.
- *
- * Revision 1.23  1995/10/18  16:12:30  quinn
- * Better diagnostics.
- *
- * Revision 1.22  1995/10/11  14:49:12  quinn
- * Smallish.
- *
- * Revision 1.21  1995/09/29  17:01:47  quinn
- * More Windows work
- *
- * Revision 1.20  1995/08/29  14:24:13  quinn
- * Added second half of close-handshake
- *
- * Revision 1.19  1995/08/29  11:17:28  quinn
- * Added code to receive close
- *
- * Revision 1.18  1995/08/28  12:21:27  quinn
- * Client can now ask for simple element set names.
- *
- * Revision 1.17  1995/08/17  12:45:02  quinn
- * Fixed minor problems with GRS-1. Added support in c&s.
- *
- * Revision 1.16  1995/08/15  12:00:04  quinn
- * Updated External
- *
- * Revision 1.15  1995/06/22  09:28:03  quinn
- * Fixed bug in SUTRS processing.
- *
- * Revision 1.14  1995/06/19  12:37:41  quinn
- * Added BER dumper.
- *
- * Revision 1.13  1995/06/16  10:29:11  quinn
- * *** empty log message ***
- *
- * Revision 1.12  1995/06/15  07:44:57  quinn
- * Moving to v3.
- *
- * Revision 1.11  1995/06/14  15:26:40  quinn
- * *** empty log message ***
- *
- * Revision 1.10  1995/06/06  14:56:58  quinn
- * Better diagnostics.
- *
- * Revision 1.9  1995/06/06  08:15:19  quinn
- * Cosmetic.
- *
- * Revision 1.8  1995/06/05  10:52:22  quinn
- * Added SCAN.
- *
- * Revision 1.7  1995/06/02  09:50:09  quinn
- * Smallish.
- *
- * Revision 1.6  1995/05/31  08:29:21  quinn
- * Nothing significant.
- *
- * Revision 1.5  1995/05/29  08:10:47  quinn
- * Moved oid.c to util.
- *
- * Revision 1.4  1995/05/22  15:30:13  adam
- * Client uses prefix query notation.
- *
- * Revision 1.3  1995/05/22  15:06:53  quinn
- * *** empty log message ***
- *
- * Revision 1.2  1995/05/22  14:56:40  quinn
- * *** empty log message ***
- *
- * Revision 1.1  1995/05/22  11:30:31  quinn
- * Added prettier client.
- *
  *
  */
 
@@ -237,6 +40,8 @@
 #include <tcl.h>
 #include <tk.h>
 #include <stdarg.h>
+
+#include "config.h"
 
 #define TMPDIR "/tmp"
 #define PROGNAME "kappa"
@@ -327,7 +132,7 @@ static void send_initRequest()
     *req->maximumRecordSize = 1024*1024;
     
     req->implementationName = CLIENT_NAME;
-    req->implementationVersion = CLIENT_VERSION;
+    req->implementationVersion = VERSION;
 
     req->idAuthentication = auth;
 

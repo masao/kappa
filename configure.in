@@ -6,6 +6,7 @@ dnl
 
 dnl
 AC_INIT(client.c)
+AM_INIT_AUTOMAKE(kappa,0.10)
 
 dnl
 dnl ------ Substitutions
@@ -43,7 +44,7 @@ elif test "$YAZDIR" = ""; then
         done
 fi
 if test ! -d $YAZDIR; then
-	AC_MSG_WARN(YAZ directory ${YAZDIR} doesn't exist)
+	AC_MSG_ERROR(YAZ directory ${YAZDIR} doesn't exist)
 else
 	AC_MSG_RESULT($YAZDIR)
 fi
@@ -86,7 +87,7 @@ else
 		fi
 	done
 	if test "$TCL_VERSION" = nope; then
-		AC_MSG_WARN(Didn't find Tcl)
+		AC_MSG_ERROR(Didn't find Tcl)
 		TCL_LIB_SPEC=-ltcl
 		TCLINC=" # -I.. Tcl/Tk include path"
 	else
@@ -120,7 +121,7 @@ else
 		fi
 	done
 	if test "$TK_VERSION" = nope; then
-		AC_MSG_WARN(Didn't find Tk)
+		AC_MSG_ERROR(Didn't find Tk)
 		TKLIB=-ltk
 	else
 		TKLIB=${tryprefix}/lib/libtk${TK_VERSION}.a
@@ -190,4 +191,11 @@ else
 	TKINC=$XINCLUDES
 	TKLIB="${TKLIB} ${XLIBSW} ${TCLLIB}"
 fi
+
+dnl
+dnl Output files.
+dnl
+
+AM_CONFIG_HEADER(config.h)
+
 AC_OUTPUT(Makefile)

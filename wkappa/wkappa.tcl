@@ -2,7 +2,8 @@
 # the next line restarts using wish \
 exec wish "$0" "$@"
 # HTMLライブラリの読み込み
-source html_library.tcl
+source [file dirname [info script]]/html_library.tcl
+
 # 初期設定
 proc Init {} {
     global w
@@ -109,6 +110,16 @@ proc Disp_Html { file } {
 # HTML ファイルの読み込み
 proc Load_Html { file } {
     global w
+
+    if {[ string match http://* $file ]} {
+	# file is HTTP-accessible on network.
+	package require http
+	puts "Retrieving $file ..."
+	set token [::http::geturl $file]
+	::http::wait $token
+	puts "done"
+	return [::http::data $token]
+    }
     if { [ catch { set fileid [ open $file ] } msg ] } {
 	return "
 	<title>$file は形式が間違っています。</title>
@@ -125,11 +136,15 @@ proc Load_Html { file } {
 proc HMlink_callback { win href } {
     global w
     
-    if { [ string match http* $href ] } {
-	puts "HTTP Protocol Not support !!"
-	exit
+    if { [ string match http://* $href ] } {
+	# puts "HTTP Protocol Not support !!"
+	# exit
+	set w(url) $href
+	update
+	Disp_Html $w(url)
+	return
     }
-    if { [string match z39.50* $href] } {
+    if { [string match z39.50s://* $href] } {
 	exec kappa $href &
 	return
     }

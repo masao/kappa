@@ -1,3 +1,8 @@
+Mon Oct 18 18:33:46 1999  Masao Takaku  <masao@ulis.ac.jp>
+
+	* client.tcl.in: カレントディレクトリに"opensite"ファイルがないと
+	起動時にサーバリストが出ないバグを直した。($conf(datadir)を定義)
+
 Thu Oct 14 12:16:08 1999  Yuka Egusa  <yuka@cosmo.ulis.ac.jp>
 
 	* README: バグ情報を追加した。

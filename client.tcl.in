@@ -19,6 +19,9 @@ set conf(hlcolor) {blue}	;# 強調色
 set conf(openGeometry) 633x518+220+120
 set conf(searchGeometry) 681x607+200+100
 
+# データファイルの置場所
+set conf(datadir) [file dirname [info script]]
+
 . configure -bg $conf(bgcolor)
 
 # C言語と、コマンドをやりとりしている関数 ---------------------------------
@@ -161,7 +164,7 @@ proc makeMenuButton {name parent} {
 
 # 接続ウインドウの定義
 proc popUpOpenCmd {} {
-    global version conf host port dbname format comment
+    global conf host port dbname format comment
 
     toplevel .topen
     wm withdraw .
@@ -218,8 +221,8 @@ proc popUpOpenCmd {} {
 	    -relief groove -width 60 -height 17 \
 	    -yscrollcommand ".topen.s1 set" -xscrollcommand ".topen.s2 set"
 
-    set basedir [ file dirname [ info script ] ]
-    getDBInfo "$basedir/opensite"
+    # set basedir [ file dirname [ info script ] ]
+    getDBInfo "$conf(datadir)/opensite"
     # puts [parray comment]
     set size [ array size comment ]
     set i "0"

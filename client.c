@@ -574,16 +574,18 @@ static int send_searchRequest(char *arg)
 static int process_searchResponse(Z_SearchResponse *res)
 {
     char buf[BUFSIZE];
+    
     if (*res->searchStatus)
         printf("Search was a success.\n");
     else
-        printf("Search was a bloomin' failure.\n");
+        printf("Search was failed.\n");
     /* 10.12 process_searchResponse() */
     /* リストボックスに、検索式とヒットした件数を表示し */
     /* show のためのエントリウィジットにその値を挿入 */
-    sprintf(buf,"[%3d]  検索式:%s  ヒットした件数:%d\n", setnumber,
-	    Tcl_GetVar(interp,"TclEntryArg",0), *res->resultCount);
-    tclPrintf(buf, 0);
+    sprintf(buf, ".l0 insert end {[%3d] 検索式: %s   ヒットした件数:%d}\n",
+	    setnumber, Tcl_GetVar(interp,"TclEntryArg",0), *res->resultCount);
+    Tcl_Eval(interp, buf);
+
     strcpy(buf, ".showEnter.setno delete 0 end\n");
     strcat(buf, ".showEnter.beginno delete 0 end\n");
     strcat(buf, ".showEnter.endno delete 0 end\n");
@@ -1382,13 +1384,9 @@ int main(int argc, char **argv)
 void tclPrintf(char *str, int lnum)
 {
     char buf[BUFSIZE];
-
+    
     /* Tcl_SetVar(interp,"setdata", str,0); */
-    if( lnum == 0){
-        sprintf(buf, ".l0 insert end {%s}", str);
-    } else if(lnum == 1){
-        sprintf(buf, ".l1 insert end {%s}", str); 
-    } else if (lnum == 2) {
+    if (lnum == 2) {
 	sprintf(buf, "errWin {%s}", str);
     } else if(lnum == 4){
 	sprintf(buf, "errWin_open {%s}", str);

@@ -462,9 +462,8 @@ bind .l0 <ButtonRelease-1> {
     # show エントリー用 
     set setnum [expr [.l0 curselection] + 1]
     set liststr [.l0 get [.l0 curselection]]
-    set flagb [expr [string last ":" $liststr] + 1]
-    set flage [expr [string last "\n" $liststr] -1]
-    set endnumber [string range $liststr $flagb $flage]
+    set len [expr [string length $liststr] - 1]
+    set endnumber [string range $liststr [string wordstart $liststr $len] $len]
     if { $endnumber > 30} {
 	set endnumber 30
     }

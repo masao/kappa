@@ -1,3 +1,8 @@
+Sun Sep 12 05:33:46 1999  Masao Takaku  <masao@ulis.ac.jp>
+
+	* TODO: いろいろ追加した。
+	
+
 Fri Sep 10 12:36:26 1999  Masao Takaku  <masao@ulis.ac.jp>
 
 	* client.c (display_diagrecs): データベースからのエラーメッセージ

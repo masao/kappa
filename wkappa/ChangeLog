@@ -1,0 +1,7 @@
+Tue Oct 12 11:41:06 1999  Yuka Egusa  <yuka@cosmo.ulis.ac.jp>
+
+	* wkappa.tcl:サーバ情報をHTMLファイルから読み込みkappaを起動できる
+	プログラムを作成した。
+	
+
+

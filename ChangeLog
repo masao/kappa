@@ -1,3 +1,11 @@
+Tue Oct 12 11:35:22 1999  Yuka Egusa  <yuka@cosmo.ulis.ac.jp>
+
+	* client.c:返戻結果表示欄(listbox)での'\tを
+	やめた。 
+
+	* wkappa: 接続サーバをHTMLから読めるプログラムが
+	入ったディレクトリを追加
+
 Mon Oct 11 12:40:23 1999  Yuka Egusa  <yuka@cosmo.ulis.ac.jp>
 
 	* client.{c,tcl.in},kappa: % kappa ZURL と指定したときには

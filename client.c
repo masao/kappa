@@ -436,7 +436,7 @@ static void display_diagrecs(Z_DiagRec **pp, int num)
 static void display_nameplusrecord(Z_NamePlusRecord *p)
 {  
     if (p->databaseName)
-	fprintf(tcldump,"DBname:%s \t,", p->databaseName);
+	fprintf(tcldump,"DBname:%s   ", p->databaseName);
     if (p->which == Z_NamePlusRecord_surrogateDiagnostic)
         display_diagrecs(&p->u.surrogateDiagnostic, 1);
     else
@@ -457,10 +457,10 @@ static void display_records(Z_Records *p)
     else {
 	tcldump = fopen(tcldumpfilename, "w");
 	
-	fprintf(tcldump,"************************************************************ \n \t%d件のレコードが返ってきました\n", p->u.databaseOrSurDiagnostics->num_records);
+	fprintf(tcldump,"************************************************************ \n   %d件のレコードが返ってきました\n", p->u.databaseOrSurDiagnostics->num_records);
 
         for (i = 0; i < p->u.databaseOrSurDiagnostics->num_records; i++) {
-	    fprintf(tcldump,"------------------------------------------------------------------- \n[%d] No%d \t ",
+	    fprintf(tcldump,"------------------------------------------------------------------- \n[%d] No%d    ",
 		    buf_setnumber, show_start_position++);
             display_nameplusrecord(p->u.databaseOrSurDiagnostics->records[i]);
 	}

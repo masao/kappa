@@ -1,0 +1,68 @@
+Sun Sep  5 00:45:33 1999  Yuka Egusa  <yuka@dream.ipc.ulis.ac.jp>
+
+[kappa-0.8]
+
+	* README,INSTALL: ドキュメントを追加した。
+	* client.tcl: 色が部分的に変わるバグを直した。
+	* client.tcl: デモ用にウインドウのサイズ、位置を固定する部分を
+          増やした。        
+
+Mon May 17 22:03:54 1999  Yuka Egusa  <yuka@voyager.ulis.ac.jp>
+
+[kappa-0.7]
+
+	* サーバ情報のURLを正しい記述に直した search://  → z39.50s://
+	  [client.tcl]
+	* サーバ情報をIndex Data社のターゲット情報から追加できるようにした
+
+Sat Apr 24 22:46:00 1999  Yuka Egusa  <yuka@voyager.ulis.ac.jp>
+
+[kappa-0.6]
+	
+	* 返戻機能でヒット件数が30件以上の時、クリックして選択した時に
+	始めの30件だけ表示するようにした
+
+Fri Apr 23 21:11:59 1999  Masao Takaku  <masao@voyager.ulis.ac.jp>
+
+[kappa-0.5]
+
+	* ccl_rpn_deleteを呼ぶのをやめた。[client.c]
+
+	* getDBInfoルーチンで選択したフォーマット(SUTRS)などを検索ウィンド
+	ウでの表示に用いるようにした。[client.tcl]	
+
+Sun Apr 18 20:49:04 1999  Masao Takaku  <masao@voyager.ulis.ac.jp>
+
+[kappa-0.4.1]
+
+	* client.tclでopensiteを読みにいく位置をカレントディレクトリから、
+	client.tclとおなじディレクトリに変更した。
+
+	* Tcl_Init, Tk_Init, Tcl_EvalFileなどのエラー処理を追加した。
+	
+
+Sat Apr 17 10:32:11 1999  Masao Takaku  <masao@voyager.ulis.ac.jp>
+
+[kappa-0.4]
+
+	* Tclファイルからホスト名指定のコードを消した。opensiteファイルに
+	Z-URL形式でホスト名などをあらかじめ書いておくようにしておく。
+
+Sat Apr 17 00:40:13 1999  Masao Takaku  <masao@voyager.ulis.ac.jp>
+
+[kappa-0.3.1]
+
+	* CCLなどの検索式のエラーをウィンドウ上に表示するようにした。
+
+	* kappaスクリプト中でclientが実行できない場合のエラー処理を行なう。
+
+	* 表示用のファイル名を引数にとらずにCプログラム中で生成するよう変
+	更。
+
+Wed Apr 14 21:39:44 1999  Masao Takaku  <masao@voyager.ulis.ac.jp>
+
+[kappa-0.3]
+	
+	* nkfを利用して、EUC, SJIS, JISのコードを表示可にした。
+
+	* kappaスクリプトをcsh→shスクリプトに変更。

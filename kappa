@@ -1,0 +1,21 @@
+#!/bin/sh
+
+client="`dirname $0`/client"
+
+if [ -z "$DISPLAY" ]; then
+    echo "Error: can't open display."
+    echo "Please set DISPLAY variable"
+    exit 1
+fi
+
+if [ ! -e "$client" ]; then
+    echo "Error: can't execute $client."
+    exit 1
+fi
+
+while true; do
+    $client
+    if [ $? -eq 0 ]; then
+	exit 0
+    fi
+done

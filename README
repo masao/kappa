@@ -1,0 +1,34 @@
+< 注意 >
+
+1. あらかじめkinput2 を起動しておく（日本語入力のため）
+  voyagerの場合
+   % /usr/local/X11R6/bin/kinput2 -jserver voyager 
+     -ccdef /usr/users/others/yuka/.ccdef.kinput2
+
+  dreamの場合
+  % xset +fp tcp/nile:7100
+  % env XFILESEARCHPATH /home/x/masao/kinput2/app-defaults/Kinput2 
+      /home/x/masao/kinput2/bin/kinput2 -jserver dream 
+      -ccdef /home/x/yuka/.ccdef.kinput2
+
+2. ウインドウ（サイズ、位置）の固定をしたくない場合は client.tcl の
+   一番下の以下の2行をコメントアウトする。（デモ用コード）
+
+  wm geometry . 681x607+200+100
+  wm geometry .topen 633x518+220+120
+
+< 検索例 >
+
+・JMARC server
+ バーチャルリアリティ
+ 仮想現実
+ 人工現実
+ set=1 or set=2 or set=3
+・ULIS-DL server （履歴検索不可）
+ 統計
+ ti=統計
+ ti=統計 and 入門
+・ Wisconsin-madison sever （履歴検索不可）
+ au=lancaster
+ au=lancaster and ti=library
+

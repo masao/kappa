@@ -1,6 +1,6 @@
 #!/bin/sh
 
-client="`dirname $0`/client"
+client="`dirname $0`/kappa.bin"
 
 if [ -z "$DISPLAY" ]; then
     echo "Error: can't open display."
@@ -8,7 +8,7 @@ if [ -z "$DISPLAY" ]; then
     exit 1
 fi
 
-if [ ! -e "$client" ]; then
+if [ ! -x "$client" ]; then
     echo "Error: can't execute $client."
     exit 1
 fi

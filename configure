@@ -1876,6 +1876,7 @@ fi
 	TKLIB="${TKLIB} ${XLIBSW} ${TCLLIB}"
 fi
 
+test "${prefix}" = NONE && prefix=/usr/local
 pkgdatadir="${prefix}/share/kappa"
 cat >> confdefs.h <<EOF
 #define DATA_DIR "${pkgdatadir}"

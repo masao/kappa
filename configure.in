@@ -193,6 +193,7 @@ fi
 dnl
 dnl Set default Kappa directory
 dnl
+test "${prefix}" = NONE && prefix=/usr/local
 pkgdatadir="${prefix}/share/kappa"
 AC_DEFINE_UNQUOTED(DATA_DIR, "${pkgdatadir}")
 

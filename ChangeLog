@@ -1,3 +1,13 @@
+Tue Sep  7 02:48:14 1999  Masao Takaku  <masao@dream.ipc.ulis.ac.jp>
+
+	* 'make install'した状態でもちゃんと動くようにした。
+	データファイル（opensite,default.bib,client.tcl）はデフォルトでは
+	/usr/local/share/kappaにおかれる。
+
+	* acconfig.h: 追加。config.hを利用するため。
+	* INSTALL: インストール方法を書いた。
+	
+
 Mon Sep  6 21:15:20 1999  Masao Takaku  <masao@dream.ipc.ulis.ac.jp>
 
 	* kappa: client -> kappa.bin

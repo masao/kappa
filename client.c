@@ -44,8 +44,7 @@
 #include "config.h"
 
 #define TMPDIR "/tmp"
-#define PROGNAME "kappa"
-#define CLIENT_NAME "Kappa"
+#define BUFSIZE 1024
 
 /* TclTk */
 static char *TclCmdName = "TclClientCommand";
@@ -57,7 +56,7 @@ void reverse(char s[]);
 void itoa(int n,char s[]);
 Tcl_Interp *interp;
 FILE *tcldump;
-char tcldumpfilename[30];
+char tcldumpfilename[BUFSIZE];
 static int show_start_position;
 int buf_setnumber; /* show の時に必要 */
 
@@ -131,7 +130,7 @@ static void send_initRequest()
 
     *req->maximumRecordSize = 1024*1024;
     
-    req->implementationName = CLIENT_NAME;
+    req->implementationName = PACKAGE;
     req->implementationVersion = VERSION;
 
     req->idAuthentication = auth;
@@ -1152,6 +1151,7 @@ static void initialize(void)
 {
 #if CCL2RPN
     FILE *inf;
+    char filename[BUFSIZE];
 #endif
     nmem_init();
     if (!(out = odr_createmem(ODR_ENCODE)) ||
@@ -1164,7 +1164,9 @@ static void initialize(void)
 
 #if CCL2RPN
     bibset = ccl_qual_mk (); 
-    inf = fopen ("default.bib", "r");
+    strcpy(filename, DATA_DIR);
+    strcat(filename, "/default.bib");
+    inf = fopen (filename, "r");
     if (inf) {
         ccl_qual_file (bibset, inf);
         fclose (inf);
@@ -1175,8 +1177,8 @@ static void initialize(void)
 static int client(char *binary_path)
 {
     Tk_Window	toplevel;
-    char inTclFilename[30];
-    strcpy(inTclFilename, dirname(binary_path));
+    char inTclFilename[BUFSIZE];
+    strcpy(inTclFilename, DATA_DIR);
     strcat(inTclFilename, "/client.tcl");
 
     /* extracts from Tk_Main below */
@@ -1381,7 +1383,7 @@ int main(int argc, char **argv)
     int opened = 0;
 
     initialize();
-    sprintf(tcldumpfilename, "%s/%s%d", TMPDIR, PROGNAME, getpid());
+    sprintf(tcldumpfilename, "%s/%s%d", TMPDIR, PACKAGE, getpid());
     cmd_base("Default");
     printf("setNo[%d]>>",setnumber + 1);
 

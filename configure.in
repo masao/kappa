@@ -6,7 +6,8 @@ dnl
 
 dnl
 AC_INIT(client.c)
-AM_INIT_AUTOMAKE(kappa,0.10)
+AM_INIT_AUTOMAKE(kappa,0.11)
+AM_CONFIG_HEADER(config.h)
 
 dnl
 dnl ------ Substitutions
@@ -20,10 +21,7 @@ AC_SUBST(YAZDIR)
 dnl
 dnl ------ Preliminary settings
 AC_PROG_CC
-AC_STDC_HEADERS
-if test "$ac_cv_header_stdc" = no; then
-	AC_MSG_WARN(Your system doesn't seem to support ANSI C)
-fi
+AC_PROG_INSTALL
 
 dnl ------ look for YAZ
 dnl
@@ -44,7 +42,7 @@ elif test "$YAZDIR" = ""; then
         done
 fi
 if test ! -d $YAZDIR; then
-	AC_MSG_ERROR(YAZ directory ${YAZDIR} doesn't exist)
+	AC_MSG_ERROR(YAZ directory ${YAZDIR} doesn't exist.)
 else
 	AC_MSG_RESULT($YAZDIR)
 fi
@@ -53,8 +51,8 @@ dnl
 dnl ------ look for Tcl/Tk
 dnl
 AC_ARG_WITH(
-	tcltkdir,
-	[  --with-tcltkdir=DIR     set prefix for Tcl/Tk library],
+	tcldir,
+	[  --with-tcl-prefix=DIR   set prefix for Tcl/Tk library],
 	[tcltkprefix=${withval}],
 	[tcltkprefix='/usr/local']
 )
@@ -193,9 +191,13 @@ else
 fi
 
 dnl
+dnl Set default Kappa directory
+dnl
+pkgdatadir="${prefix}/share/kappa"
+AC_DEFINE_UNQUOTED(DATA_DIR, "${pkgdatadir}")
+
+dnl
 dnl Output files.
 dnl
-
-AM_CONFIG_HEADER(config.h)
 
 AC_OUTPUT(Makefile)

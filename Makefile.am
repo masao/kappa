@@ -3,10 +3,11 @@
 ## This is a part of kappa
 ## Copyright (C) 1999, Yuka Egusa, Masao Takaku. All rights reserved.
 
-bin_PROGRAMS = kappa.bin
 bin_SCRIPTS = kappa
-
+bin_PROGRAMS = kappa.bin
 kappa_bin_SOURCES = client.c
+
+pkgdata_DATA = client.tcl opensite default.bib
 
 EXTRA_DIST = client.tcl opensite default.bib
 

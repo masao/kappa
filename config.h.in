@@ -1,7 +1,7 @@
 /* config.h.in.  Generated automatically from configure.in by autoheader.  */
 
-/* Define if you have the ANSI C header files.  */
-#undef STDC_HEADERS
+/* Define pathname for data-files of Kappa */
+#undef DATA_DIR
 
 /* Name of package */
 #undef PACKAGE

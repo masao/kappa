@@ -1,4 +1,50 @@
-INSTALL tips for <KAPPA>
+	☆ 日本語Z39.50クライアントKappaのインストール方法 ☆
+
+							たかくまさお
+							masao@ulis.ac.jp
+
+1. KappaのインストールにはTcl/Tkライブラリ、YAZライブラリが必要です。
+
+  ・Tcl/Tkライブラリ（Tcl7.6以上、Tk4.2以上）
+	日本語化されているものをインストールしないと日本語の入力表示が
+	できません。以下から入手できます。
+	ftp://ftp.sra.co.jp/pub/lang/tcl/
+  ・YAZライブラリ
+	インストールする必要はありません。このディレクトリの一つ下の階
+	層でコンパイルしておいて下さい。以下から入手できます。
+	http://www.indexdata.dk/yaz/
+
+2. コンパイルする。configureスクリプトを動かし、makeする。
+
+	% ./configure	[RETURN]
+	% make	[RETURN]
+
+  configureスクリプトには、YAZライブラリの位置、Tcl/Tkライブラリの位置
+  を与えることができます。
+	% ./configure --with-yazdir=../../yaz-1.4pl2 \
+			--with-tcl-prefix=/opt/local	[RETURN]
+
+	% make	[RETURN]	
+
+3. make installする。
+
+	% su	[RETURN]
+	Password: ******	[RETURN]
+	# make install	[RETURN]
+
+	デフォルトでは以下の場所にインストールされます。
+	  /usr/local/bin/kappa	:Kappaスクリプト
+	  /usr/local/bin/kappa.bin	:Kappaプログラム（実行形式）
+	  
+	  /usr/local/share/kappa/client.tcl	:Tcl/Tkプログラム
+	  /usr/local/share/kappa/default.bib	:検索式の設定
+	  /usr/local/share/kappa/opensite	:接続画面に表示される
+						 サーバリスト
+
+☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆
+
+以下は、参考のためにつける特定環境でのコンパイルオプション。
+（configureの導入により、現在は全く必要ない。）
 
 あらかじめ
 YAZ-1.4pl2をコンパイルしておくこと。
@@ -19,4 +65,3 @@ TCLTK_LIBDIR=/home/x/yuka/usr/local/lib
 TCLTK_INC=/opt/free/include
 TCLTK_LIBDIR=/opt/free/lib
 TCLTK_LIBS="-ltk8.0jp -ltcl8.0jp -lX11 -lm"
-

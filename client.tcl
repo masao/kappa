@@ -402,7 +402,7 @@ menu .menubar.file.menu -fg black -bg #C000DF00FF00
 # 以下 3行のコメントアウトを外すと、
 # 新しい接続ウインドウが接続を切らずに出てくる
 .menubar.file.menu add command -label "New Window" -command {
-     exec ./kappa &
+     exec kappa.bin &
 }
 .menubar.file.menu add command -label "Exit" -command {
     Searchproc "quit" ""

@@ -54,11 +54,14 @@ proc MakeEntry {} {
     pack $w(sub1) -side top -fill x -expand no
     # エントリ
     set w(label) $w(sub1).lab
-    label $w(label) -text "ロケーション"
+    label $w(label) -text "URL"
     set w(ent) $w(sub1).ent
     entry $w(ent) -textvariable w(url) -bg white
     pack $w(label) -side left 
     pack $w(ent) -side left -fill x -expand yes
+    bind $w(ent) <Key-Return> {
+	HMlink_callback $w(text) $w(url)
+    }
 }
 # テキスト
 proc MakeText {} {
@@ -136,7 +139,6 @@ proc Load_Html { file } {
 # リンク先へ移動
 proc HMlink_callback { win href } {
     global w
-    
     if { [ string match http://* $href ] } {
 	# puts "HTTP Protocol Not support !!"
 	# exit

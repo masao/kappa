@@ -1,3 +1,8 @@
+Tue Oct 26 02:44:17 1999  Masao Takaku  <masao@ulis.ac.jp>
+
+	* default.bib: Dublin Core用の15項目(USE: 1097〜1111)を追加。
+	(dc.title etc.)
+
 Mon Oct 18 18:33:46 1999  Masao Takaku  <masao@ulis.ac.jp>
 
 	* client.tcl.in: カレントディレクトリに"opensite"ファイルがないと

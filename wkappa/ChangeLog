@@ -1,3 +1,8 @@
+Tue Oct 26 03:09:26 1999  Yuka Egusa  <yuka@cosmo.ulis.ac.jp>
+
+	* wkappa.tcl: ホームページを
+	http://cosmo.ulis.ac.jp/~yuka/wkappa/index.html に変更
+
 Tue Oct 19 16:31:23 1999  Masao Takaku  <masao@ulis.ac.jp>
 
 	* wkappa.tcl: html_library.tclの読み込み位置をカレントディレクトリ

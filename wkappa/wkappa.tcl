@@ -9,7 +9,8 @@ proc Init {} {
     global w
     set w(size) 0
     set w(indent) 1.2
-    set w(home) [ file dirname [ info script ] ]/index.html
+#    set w(home) [ file dirname [ info script ] ]/index.html
+    set w(home) http://cosmo.ulis.ac.jp/~yuka/wkappa/index.html
     set w(url) $w(home)
     set w(message) "";
 }

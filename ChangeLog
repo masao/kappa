@@ -1,3 +1,7 @@
+Wed Sep 22 09:10:26 1999  Masao Takaku  <masao@ulis.ac.jp>
+
+	* client.c (client): Tcl/Tk8.2で動作しないバグを直した。
+
 Sun Sep 12 05:33:46 1999  Masao Takaku  <masao@ulis.ac.jp>
 
 	* TODO: いろいろ追加した。

@@ -1193,11 +1193,9 @@ static int client(char *binary_path)
 
     /* parse options here if needed */
 
-#if TCL_MAJOR_VERSION < 8
     if (Tcl_Init(interp) != TCL_OK) {
 	fprintf(stderr, "Tcl_Init failed: %s\n", interp->result);
     }
-#endif
 
     /* Initialize Tk */
     /* application name/class determined from "argv0" (not set here)*/

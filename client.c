@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <assert.h>
+#include <unistd.h>
 
 #include <yaz-util.h>
 
@@ -49,11 +50,9 @@
 /* TclTk */
 static char *TclCmdName = "TclClientCommand";
 static int tclCommandCallback( ClientData cd, 
-			int argc, char *argv[]);
+			       int argc, char *argv[]);
 
-static int tclPrintf(char *str,int lnum);
-void reverse(char s[]);
-void itoa(int n,char s[]);
+void tclPrintf(char *str,int lnum);
 Tcl_Interp *interp;
 FILE *tcldump;
 char tcldumpfilename[BUFSIZE];
@@ -63,7 +62,7 @@ int buf_setnumber; /* show の時に必要 */
 static ODR out, in, print;              /* encoding and decoding streams */
 static COMSTACK conn = 0;               /* our z-association */
 static Z_IdAuthentication *auth = 0;    /* our current auth definition */
-static char *databaseNames[128];
+static char *databaseNames[BUFSIZE];
 static int num_databaseNames = 0;
 static int setnumber = 0;               /* current result set number */
 static int smallSetUpperBound = 0;
@@ -76,8 +75,7 @@ static int recordsyntax = VAL_USMARC;
 static int sent_close = 0;
 static ODR_MEM session_mem;             /* memory handle for init-response */
 static Z_InitResponse *session = 0;     /* session parameters */
-static char last_scan[512] = "0";
-static char last_cmd[100] = "?";
+static char last_scan[BUFSIZE] = "0";
 static FILE *marcdump = 0;
 
 typedef enum {
@@ -172,9 +170,9 @@ static int process_initResponse(Z_InitResponse *res)
 int cmd_open(char *arg)
 {
     void *add;
-    char type[100], addr[100];
+    char type[BUFSIZE], addr[BUFSIZE];
     CS_TYPE t;
-    char tcl_buf[100];
+    char tcl_buf[BUFSIZE];
 
     if (conn) {
 	/* printf("Already connected.\n");*/
@@ -192,17 +190,17 @@ int cmd_open(char *arg)
     }
     else
 #ifdef USE_XTIMOSI
-    if (!strcmp(type, "osi")) {
-        t = mosi_type;
-        protocol = PROTO_SR;
-    }
-    else
+	if (!strcmp(type, "osi")) {
+	    t = mosi_type;
+	    protocol = PROTO_SR;
+	}
+	else
 #endif
-    {
-        sprintf(tcl_buf, "Bad type: %s\n", type);
-	tclPrintf(tcl_buf,4);
-	return 0;
-    }
+	{
+	    sprintf(tcl_buf, "Bad type: %s\n", type);
+	    tclPrintf(tcl_buf, 4);
+	    return 0;
+	}
     if (!(conn = cs_create(t, 1, protocol))) {
         perror("cs_create");
 	tclPrintf("Cannot connect",4);
@@ -230,7 +228,7 @@ int cmd_open(char *arg)
 int cmd_authentication(char *arg)
 {
     static Z_IdAuthentication au;
-    static char open[256];
+    static char open[BUFSIZE];
 
     if (!*arg) {
         printf("Auth field set to null\n");
@@ -441,8 +439,8 @@ static void display_nameplusrecord(Z_NamePlusRecord *p)
 static void display_records(Z_Records *p)
 {
     int i;
-    char buf[1024];
-    char nkf_command[40];
+    char buf[BUFSIZE];
+    char nkf_command[BUFSIZE];
 
     if (p->which == Z_Records_NSD)
 	display_diagrecs (&p->u.nonSurrogateDiagnostic, 1);
@@ -455,14 +453,15 @@ static void display_records(Z_Records *p)
 	fprintf(tcldump,"************************************************************ \n \t%d件のレコードが返ってきました\n", p->u.databaseOrSurDiagnostics->num_records);
 
         for (i = 0; i < p->u.databaseOrSurDiagnostics->num_records; i++) {
-	    fprintf(tcldump,"------------------------------------------------------------------- \n[%d] No%d \t ",buf_setnumber,show_start_position++);
+	    fprintf(tcldump,"------------------------------------------------------------------- \n[%d] No%d \t ",
+		    buf_setnumber, show_start_position++);
             display_nameplusrecord(p->u.databaseOrSurDiagnostics->records[i]);
 	}
     }
     fclose(tcldump);
     sprintf(nkf_command, "nkf -e %s > %s_EUC" ,tcldumpfilename ,tcldumpfilename);
     system(nkf_command);
-    sprintf(buf,"recordToListbox %s_EUC .l1" ,tcldumpfilename);
+    sprintf(buf, "recordToListbox %s_EUC .l1", tcldumpfilename);
     Tcl_Eval(interp, buf);
 }
 
@@ -567,37 +566,35 @@ static int send_searchRequest(char *arg)
 
 static int process_searchResponse(Z_SearchResponse *res)
 {
+    char buf[BUFSIZE];
     if (*res->searchStatus)
         printf("Search was a success.\n");
     else
         printf("Search was a bloomin' failure.\n");
-/* 10.12 process_searchResponse() */
-    {
-/* リストボックスに、検索式とヒットした件数を表示し */
-/* show のためのエントリウィジットにその値を挿入 */
-	char buf[1000];
-	sprintf(buf,"[%3d]  検索式:%s  ヒットした件数:%d\n", setnumber,
-		Tcl_GetVar(interp,"TclEntryArg",0), *res->resultCount);
-	tclPrintf(buf,0);
-	Tcl_Eval(interp,".showEnter.setno delete 0 end" );
-	Tcl_Eval(interp,".showEnter.beginno delete 0 end" );
-	Tcl_Eval(interp,".showEnter.endno delete 0 end" );
-	itoa(setnumber,buf);
-	Tcl_SetVar(interp,"Csetnodata", buf,0);
-	Tcl_Eval(interp,".showEnter.setno insert 0 $Csetnodata" );
-	Tcl_Eval(interp,".showEnter.beginno insert 0 1" );
+    /* 10.12 process_searchResponse() */
+    /* リストボックスに、検索式とヒットした件数を表示し */
+    /* show のためのエントリウィジットにその値を挿入 */
+    sprintf(buf,"[%3d]  検索式:%s  ヒットした件数:%d\n", setnumber,
+	    Tcl_GetVar(interp,"TclEntryArg",0), *res->resultCount);
+    tclPrintf(buf, 0);
+    strcpy(buf, ".showEnter.setno delete 0 end\n");
+    strcat(buf, ".showEnter.beginno delete 0 end\n");
+    strcat(buf, ".showEnter.endno delete 0 end\n");
+    strcat(buf, ".showEnter.setno delete 0 end\n");
+    strcat(buf, ".showEnter.beginno delete 0 end\n");
+    strcat(buf, ".showEnter.endno delete 0 end" );
+    Tcl_Eval(interp, buf);
 
-	/* ヒットした件数が30件以上だったら showエントリには30を入力  */
-	if( *res->resultCount > 30) {
-	    strcpy(buf, "30");
-	}
-	else {
-	    itoa(*res->resultCount,buf);
-	}
-	Tcl_SetVar(interp,"Cendnodata",buf ,0);
-	Tcl_Eval(interp,".showEnter.endno insert 0 $Cendnodata" );
-    }
-    
+    sprintf(buf, ".showEnter.setno insert 0 {%d}", setnumber);
+    Tcl_Eval(interp, buf);
+    strcpy(buf, ".showEnter.beginno insert 0 1");
+    Tcl_Eval(interp, buf);
+
+    /* ヒットした件数が30件以上だったら showエントリには30を入力  */
+    sprintf(buf, ".showEnter.endno insert 0 {%d}",
+	    *res->resultCount > 30 ? 30 : *res->resultCount);
+    Tcl_Eval(interp, buf);
+
     printf("records returned: %d\n", *res->numberOfRecordsReturned);
     setno += *res->numberOfRecordsReturned;
     if (res->records)
@@ -703,9 +700,8 @@ static int send_presentRequest(char *arg)
     char setstring[100];
 
     /* *** input 1997.9.9 send_presentRequest() */
-    char buf[100],*p2;
-     
-  
+    char *p2;
+
     if((p2 = strchr(arg, '@'))) {
 	buf_setnumber = atoi(p2 + 1);
 	printf("%d\n",buf_setnumber);
@@ -808,6 +804,8 @@ static int cmd_show(char *arg)
 int cmd_quit(char *arg)
 {
     printf("See you later, alligator.\n");
+    unlink(tcldumpfilename);
+    strcat(tcldumpfilename, "_EUC");
     unlink(tcldumpfilename);
     exit(0);
     return 0;
@@ -1220,8 +1218,8 @@ static int client(char *binary_path)
     /*NOTREACHED*/
     return 0;
 }
-static int
-tclCommandCallback( ClientData cd,int argc, char *argv[])
+
+static int tclCommandCallback( ClientData cd,int argc, char *argv[])
 {
     int wait;
         
@@ -1256,113 +1254,111 @@ tclCommandCallback( ClientData cd,int argc, char *argv[])
     int netbufferlen = 0;
     int i;
     Z_APDU *apdu;
-
-        int res;
-
-	char tcl_cmd[BUFSIZE];
-	char tcl_entry[BUFSIZE];
+    int res;
+    char tcl_cmd[BUFSIZE];
+    char tcl_entry[BUFSIZE];
          
-	strcpy(tcl_cmd,Tcl_GetVar(interp,"TclComandName",0));
-	strcpy(tcl_entry,Tcl_GetVar(interp,"TclEntryArg",0));
+    strcpy(tcl_cmd,Tcl_GetVar(interp,"TclComandName",0));
+    strcpy(tcl_entry,Tcl_GetVar(interp,"TclEntryArg",0));
          
-	printf("\nコマンド名 ： %s\n", tcl_cmd);
-	printf("入力文字列 ： %s\n", tcl_entry);
+    printf("\nコマンド名 ： %s\n", tcl_cmd);
+    printf("入力文字列 ： %s\n", tcl_entry);
 
 #ifdef USE_SELECT
-        fd_set input;
+    fd_set input;
 #endif
-	
+
 #ifdef USE_SELECT
-        FD_ZERO(&input);
-        FD_SET(0, &input);
-        if (conn)
-            FD_SET(cs_fileno(conn), &input);
-        if ((res = select(20, &input, 0, 0, 0)) < 0) {
-            perror("select");
-            exit(1);
-        }
-        if (!res)
-            continue;
-        if (!wait && FD_ISSET(0, &input))
+    FD_ZERO(&input);
+    FD_SET(0, &input);
+    if (conn)
+	FD_SET(cs_fileno(conn), &input);
+    if ((res = select(20, &input, 0, 0, 0)) < 0) {
+	perror("select");
+	exit(1);
+    }
+    if (!res)
+	continue;
+    if (!wait && FD_ISSET(0, &input))
 #else
-	 /* この */ wait = 0;
-	if (!wait)
+	/* この */ wait = 0;
+    if (!wait)
 #endif
-	{
-	    for (i = 0; cmd[i].cmd; i++)
-		if (!strncmp(cmd[i].cmd, tcl_cmd, strlen(tcl_cmd))) {
-                    res = (*cmd[i].fun)(tcl_entry);
-                    break;
-		}
-	    if (res < 2) {
-		return 0;
+    {
+	for (i = 0; cmd[i].cmd; i++)
+	    if (!strncmp(cmd[i].cmd, tcl_cmd, strlen(tcl_cmd))) {
+		res = (*cmd[i].fun)(tcl_entry);
+		break;
 	    }
+	if (res < 2) {
+	    return 0;
 	}
+    }
 #ifdef USE_SELECT
-        if (conn && FD_ISSET(cs_fileno(conn), &input))
+    if (conn && FD_ISSET(cs_fileno(conn), &input))
 #endif
-        {
-            do {
-                if ((res = cs_get(conn, &netbuffer, &netbufferlen)) < 0) {
-                    perror("cs_get");
-                    exit(1);
-                }
-                if (!res) {
-                    printf("Target closed connection.\n");
-		    unlink(tcldumpfilename);
-                    exit(1);
-                }
-                odr_reset(in); /* release APDU from last round */
-                odr_setbuf(in, netbuffer, res, 0);
-                if (!z_APDU(in, &apdu, 0)) {
-                    odr_perror(in, "Decoding incoming APDU");
-		    fprintf(stderr, "[Near %d]\n", odr_offset(in));
-                    fprintf(stderr, "Packet dump:\n---------\n");
-                    odr_dumpBER(stderr, netbuffer, res);
-                    fprintf(stderr, "---------\n");
-                    exit(1);
-                }
+    {
+	do {
+	    if ((res = cs_get(conn, &netbuffer, &netbufferlen)) < 0) {
+		perror("cs_get");
+		exit(1);
+	    }
+	    if (!res) {
+		printf("Target closed connection.\n");
+		unlink(tcldumpfilename);
+		exit(1);
+	    }
+	    odr_reset(in); /* release APDU from last round */
+	    odr_setbuf(in, netbuffer, res, 0);
+	    if (!z_APDU(in, &apdu, 0)) {
+		odr_perror(in, "Decoding incoming APDU");
+		fprintf(stderr, "[Near %d]\n", odr_offset(in));
+		fprintf(stderr, "Packet dump:\n---------\n");
+		odr_dumpBER(stderr, netbuffer, res);
+		fprintf(stderr, "---------\n");
+		exit(1);
+	    }
 #if 0
-                if (!z_APDU(print, &apdu, 0)) {
-                    odr_perror(print, "Failed to print incoming APDU");
-                    odr_reset(print);
-                    continue;
-                }
+	    if (!z_APDU(print, &apdu, 0)) {
+		odr_perror(print, "Failed to print incoming APDU");
+		odr_reset(print);
+		continue;
+	    }
 #endif
-                switch(apdu->which) {
-		case Z_APDU_initResponse:
-		    process_initResponse(apdu->u.initResponse);
-		    break;
-		case Z_APDU_searchResponse:
-		    process_searchResponse(apdu->u.searchResponse);
-		    break;
-		case Z_APDU_scanResponse:
-		    process_scanResponse(apdu->u.scanResponse);
-		    break;
-		case Z_APDU_presentResponse:
-		    setno += *apdu->u.presentResponse->numberOfRecordsReturned;
-		    if (apdu->u.presentResponse->records)
-			display_records(apdu->u.presentResponse->records);
-		    else
-			printf("No records.\n");
-		    break;
-		case Z_APDU_sortResponse:
-		    process_sortResponse(apdu->u.sortResponse);
-		    break;
-		case Z_APDU_close:
-		    printf("Target has closed the association.\n");
-		    process_close(apdu->u.close);
-		    break;
-		default:
-		    printf("Received unknown APDU type (%d).\n", 
-			   apdu->which);
-		    exit(1);
-                }
-		printf("setNo[%d]>>",setnumber + 1);
-                fflush(stdout);
-            } while (cs_more(conn));
-        }
-	wait = 0;
+	    switch(apdu->which) {
+	    case Z_APDU_initResponse:
+		process_initResponse(apdu->u.initResponse);
+		break;
+	    case Z_APDU_searchResponse:
+		process_searchResponse(apdu->u.searchResponse);
+		break;
+	    case Z_APDU_scanResponse:
+		process_scanResponse(apdu->u.scanResponse);
+		break;
+	    case Z_APDU_presentResponse:
+		setno += *apdu->u.presentResponse->numberOfRecordsReturned;
+		if (apdu->u.presentResponse->records)
+		    display_records(apdu->u.presentResponse->records);
+		else
+		    printf("No records.\n");
+		break;
+	    case Z_APDU_sortResponse:
+		process_sortResponse(apdu->u.sortResponse);
+		break;
+	    case Z_APDU_close:
+		printf("Target has closed the association.\n");
+		process_close(apdu->u.close);
+		break;
+	    default:
+		printf("Received unknown APDU type (%d).\n", 
+		       apdu->which);
+		exit(1);
+	    }
+	    printf("setNo[%d]>>",setnumber + 1);
+	    fflush(stdout);
+	} while (cs_more(conn));
+    }
+    wait = 0;
     return TCL_OK;
 }
 
@@ -1376,35 +1372,7 @@ int main(int argc, char **argv)
     return client(argv[0]);
 }
 
-/* reverse: 文字列 s を逆順にする */
-void reverse(char s[])
-{
-     int c, i, j;
-     
-     for(i = 0,j = strlen(s) -1;i < j; i++, j--) {
-	 c = s[i];
-	 s[i] = s[j];
-	 s[j] = c;
-     }
-}
-/* itoa: n を s 中の文字に変換する */
-void itoa(int n,char s[])
-{
-    int i, sign;
-     
-    if((sign = n) < 0) /* 符合を記録する */
-        n = -n;/* nを正にする */
-    i = 0;
-    do {
-        s[i++] = n % 10 + '0';/* 次の桁をとってくる */
-    } while((n /= 10) > 0);/* それを削除する */
-    if(sign < 0)
-        s[i++] = '-';
-    s[i] = '\0';
-    reverse(s);
-}
-
-static int tclPrintf(char *str, int lnum)
+void tclPrintf(char *str, int lnum)
 {
     char buf[BUFSIZE];
 

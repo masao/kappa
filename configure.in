@@ -201,4 +201,4 @@ dnl
 dnl Output files.
 dnl
 
-AC_OUTPUT(Makefile)
+AC_OUTPUT(Makefile client.tcl)

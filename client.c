@@ -18,7 +18,10 @@
 #include <time.h>
 #include <assert.h>
 #include <unistd.h>
+#include <stdarg.h>
 
+
+/* YAZ Library */
 #include <yaz-util.h>
 
 #include <comstack.h>
@@ -37,22 +40,20 @@
 #include <yaz-ccl.h>
 #endif
 
-/* TclTk */
+/* Tcl/Tk */
 #include <tcl.h>
 #include <tk.h>
-#include <stdarg.h>
 
 #include "config.h"
 
 #define TMPDIR "/tmp"
 #define BUFSIZE 1024
 
-/* TclTk */
+/* Tcl/Tk Callback Function */
 static char *TclCmdName = "TclClientCommand";
-static int tclCommandCallback( ClientData cd, 
-			       int argc, char *argv[]);
+int tclCommandCallback(ClientData cd, int argc, char *argv[]);
 
-void tclPrintf(char *str,int lnum);
+void tclPrintf(char *str, int lnum);
 Tcl_Interp *interp;
 FILE *tcldump;
 char tcldumpfilename[BUFSIZE];
@@ -176,12 +177,12 @@ int cmd_open(char *arg)
 
     if (conn) {
 	/* printf("Already connected.\n");*/
-	tclPrintf("Already connected.",4);
+	tclPrintf("Already connected.", 4);
         return 0;
     }
     if (!*arg || sscanf(arg, "%[^:]:%s", type, addr) < 2) {
         /*fprintf(stderr, "Usage: open (osi|tcp) ':' [tsel '/']host[':'port]\n");*/
-	tclPrintf("Usage: open (osi|tcp) ':' [tsel '/']host[':'port]",4);
+	tclPrintf("Usage: open (osi|tcp) ':' [tsel '/']host[':'port]", 4);
         return 0;
     }
     if (!strcmp(type, "tcp")) {
@@ -203,19 +204,19 @@ int cmd_open(char *arg)
 	}
     if (!(conn = cs_create(t, 1, protocol))) {
         perror("cs_create");
-	tclPrintf("Cannot connect",4);
+	tclPrintf("Cannot connect", 4);
         return 0;
     }
     if (!(add = cs_straddr(conn, addr))) {
 	perror(arg);
-	tclPrintf("cannot open",4);
+	tclPrintf("cannot open", 4);
 	return 0;
     }
     printf("Connecting...");
     fflush(stdout);
     if (cs_connect(conn, add) < 0) {
         perror("connect");
-	tclPrintf("connection error occured",4);
+	tclPrintf("connection error occured", 4);
         cs_close(conn);
         conn = 0;
         return 0;
@@ -608,7 +609,7 @@ static int process_searchResponse(Z_SearchResponse *res)
     return 0;
 }
 
-static int cmd_find(char *arg)
+int cmd_find(char *arg)
 {
     if (!*arg) {
         tclPrintf("Find what?\n", 2);
@@ -623,28 +624,28 @@ static int cmd_find(char *arg)
     return 2;
 }
 
-static int cmd_ssub(char *arg)
+int cmd_ssub(char *arg)
 {
     if (!(smallSetUpperBound = atoi(arg)))
         return 0;
     return 1;
 }
 
-static int cmd_lslb(char *arg)
+int cmd_lslb(char *arg)
 {
     if (!(largeSetLowerBound = atoi(arg)))
         return 0;
     return 1;
 }
 
-static int cmd_mspn(char *arg)
+int cmd_mspn(char *arg)
 {
     if (!(mediumSetPresentNumber = atoi(arg)))
         return 0;
     return 1;
 }
 
-static int cmd_status(char *arg)
+int cmd_status(char *arg)
 {
     printf("smallSetUpperBound: %d\n", smallSetUpperBound);
     printf("largeSetLowerBound: %d\n", largeSetLowerBound);
@@ -652,7 +653,7 @@ static int cmd_status(char *arg)
     return 1;
 }
 
-static int cmd_base(char *arg)
+int cmd_base(char *arg)
 {
     int i;
     char *cp;
@@ -679,7 +680,7 @@ static int cmd_base(char *arg)
     return 1;
 }
 
-static int cmd_setnames(char *arg)
+int cmd_setnames(char *arg)
 {
     if (setnumber < 0) {
         printf("Set numbering enabled.\n");
@@ -795,7 +796,7 @@ void process_close(Z_Close *req)
     sent_close = 1;
 }
 
-static int cmd_show(char *arg)
+int cmd_show(char *arg)
 {
     if (!session) {
         printf("Session not initialized yet\n");
@@ -1206,10 +1207,12 @@ static int client(char *binary_path)
 
     /* Create commands & widgets */
     Tcl_CreateCommand(interp, TclCmdName, tclCommandCallback,
-		      (ClientData)NULL, (Tcl_CmdDeleteProc*)NULL );
+		      (ClientData)NULL, (Tcl_CmdDeleteProc*)NULL);
 
     if (Tcl_EvalFile(interp, inTclFilename) != TCL_OK) {
-	fprintf(stderr, "Tcl_EvalFile: %s: %s", inTclFilename, interp->result);
+	fprintf(stderr, "Tcl_EvalFile: error occured.\n");
+	fprintf(stderr, "  %s: %d: %s\n",
+		inTclFilename, interp->errorLine, interp->result);
 	exit(1);
     }
 
@@ -1223,10 +1226,10 @@ static int client(char *binary_path)
     return 0;
 }
 
-static int tclCommandCallback( ClientData cd,int argc, char *argv[])
+int tclCommandCallback(ClientData cd, int argc, char *argv[])
 {
     int wait;
-        
+
     static struct {
         char *cmd;
         int (*fun)(char *arg);
@@ -1358,8 +1361,8 @@ static int tclCommandCallback( ClientData cd,int argc, char *argv[])
 		       apdu->which);
 		exit(1);
 	    }
-	    printf("setNo[%d]>>",setnumber + 1);
-	    fflush(stdout);
+	    /* printf("setNo[%d]>>",setnumber + 1);
+	    fflush(stdout); */
 	} while (cs_more(conn));
     }
     wait = 0;

@@ -1,3 +1,19 @@
+Sat Sep 25 22:20:17 1999  Masao Takaku  <masao@ulis.ac.jp>
+
+	* client.tcl.in: 追加。
+	client.tcl: 削除。
+	configure.in: AC_OUTPUTにclient.tclを追加。
+
+	* client.tcl: ウィンドウのBorderWidthを2に設定した。
+
+	* client.tcl (copyright): 著作権表示をつけた。
+
+	* client.tcl: 色指定のやり方をちょっと変えた。
+	  - $conf(bgcolor), $conf(fgcolor), $conf(hlcolor) 
+
+	* client.tcl (makeMenuButton): メニューボタンを作る部分をまとめて
+	定義した。(メニューの表示ラベルを大文字化するため)
+
 Wed Sep 22 09:10:26 1999  Masao Takaku  <masao@ulis.ac.jp>
 
 	* client.c (client): Tcl/Tk8.2で動作しないバグを直した。

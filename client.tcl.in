@@ -1,23 +1,30 @@
-# 1999.3.27 fileメニューの quit を Exit に変える
-# 1999.3.27 接続ウインドウのhelpメニューに 「help」を追加 内容はまだ工事中
-# 1999.3.27 接続ウインドウのhelpメニューに 「Query Example」を追加
-# 1999.3.27 接続ウインドウのfileメニューに「New Window」を追加
+# -*- Mode: Tcl -*-
 #
-# 2.ボタンの色を変える デフォルトは #C000DF00FF00
-# -fg black -bg #C000DF00FF00 
+# Kappa : Japanese Z39.50(-1995) Client.
+#
+#  Copyright (C) 1997-1998 Yuka Egusa. All rights reserved.
+#  Copyright (C) 1999 Yuka Egusa and Masao Takaku. All rights reserved.
+
+global version
+set version "@VERSION@"
+
+global conf
 
 # 色の指定
-set DFfgcolor black
-set DFbgcolor "#C000DF00FF00"
-set HLfgcolor white
-set HLbgcolor blue
+set conf(fgcolor) {black}
+set conf(bgcolor) {#c0dfff}
+set conf(hlcolor) {blue}	;# 強調色
 
+# (デモ用に)ウィンドウのサイズ・位置を固定する。
+set conf(openGeometry) 633x518+220+120
+set conf(searchGeometry) 681x607+200+100
+
+. configure -bg $conf(bgcolor)
 
 # C言語と、コマンドをやりとりしている関数 ---------------------------------
-. configure -bg #C000DF00FF00
 proc Searchproc {cmd entry} {
-    puts $cmd
-    puts $entry
+    #puts $cmd
+    #puts $entry
     set TclComandName $cmd
     set TclEntryArg $entry
     TclClientCommand
@@ -30,37 +37,61 @@ proc recordToListbox {filename listboxname} {
     close $fd
 }
 
+# 著作権表示を行なう。
+proc copyright {} {
+    global conf version
+    toplevel .about
+    .about configure -bg $conf(bgcolor)
+    
+    set copyright "Kappa : Japanese Z39.50 Client v$version\n"
+    append copyright "Copyright (C) 1999\n"
+    append copyright "	Yuka Egusa <yuka@ulis.ac.jp>\n"
+    append copyright "	Masao Takaku <masao@ulis.ac.jp>\n"
+    append copyright "All right reserved.\n"
+    message .about.textmessage -fg $conf(fgcolor) -bg $conf(bgcolor) \
+	    -width 700 -padx 1c -pady 1c -text $copyright
+    
+    button .about.fin -bg $conf(bgcolor) -fg $conf(fgcolor) \
+	    -text " Close Help " -command {destroy .about}
+
+    pack .about.textmessage  .about.fin
+    wm title .about "About Kappa"
+}
+
 # エラーメッセージを出して オープンウインドウを出す 関数
 proc errWin_open {str} {
+    global conf
     toplevel .err1
 
-    frame .err1.f -bg #C000DF00FF00
-    label .err1.f.text -bg #C000DF00FF00 -fg black -text $str -relief ridge
-    label .err1.f.errorimage -bg #C000DF00FF00 -fg black  -bitmap error
+    frame .err1.f -bg $conf(bgcolor)
+    label .err1.f.text -bg $conf(bgcolor) -fg $conf(fgcolor) -text $str -relief ridge
+    label .err1.f.errorimage -bg $conf(bgcolor) -fg $conf(fgcolor) -bitmap error
     pack .err1.f.text .err1.f.errorimage -in .err1.f -side left
 
-    button .err1.fin -fg black -bg #C000DF00FF00  -text " OK ? " -command {
+    button .err1.fin -fg $conf(fgcolor) -bg $conf(bgcolor) -text " OK ? " -command {
         destroy .err1
-        #wm deiconify .topen
+	#wm deiconify .topen
 	exit 1
         #popUpOpenCmd
     }
     pack .err1.f .err1.fin
+    wm title .err "接続エラー"
 }
 
 # エラーメッセージを出す 関数
 proc errWin {str} {
+    global conf
     toplevel .err1
 
-    frame .err1.f -bg #C000DF00FF00
-    label .err1.f.text -bg #C000DF00FF00 -fg black -text $str -relief ridge
-    label .err1.f.errorimage -bg #C000DF00FF00 -fg black  -bitmap error
+    frame .err1.f -bg $conf(bgcolor)
+    label .err1.f.text -bg $conf(bgcolor) -fg $conf(fgcolor) -text $str -relief ridge
+    label .err1.f.errorimage -bg $conf(bgcolor) -fg $conf(fgcolor)  -bitmap error
     pack .err1.f.text .err1.f.errorimage -in .err1.f -side left
     
-    button .err1.fin -fg black -bg #C000DF00FF00  -text " OK ? " -command {
-	destroy .err1
-    }
-    pack .err1.f .err1.fin    
+    button .err1.fin -bg $conf(bgcolor) -fg $conf(fgcolor) -text " OK ? " \
+	    -command { destroy .err1 }
+    pack .err1.f .err1.fin
+    wm title .err "エラー"
 } 
 
 proc inputShowEntry {setnum beginnum endnum} {
@@ -74,11 +105,7 @@ proc inputShowEntry {setnum beginnum endnum} {
 
 # ホスト名などの情報を取得する。
 proc getDBInfo {filename} {
-    global host
-    global port
-    global dbname
-    global format
-    global comment
+    global host port dbname format comment
     set host(default) ""
     set port(default) "210"
     set dbname(default) "Default"
@@ -111,124 +138,118 @@ proc inputOpenEntry {host port DBname} {
     .topen.e2 insert 0 $DBname
 }
 
+# menubutton を作る。
+# 第1引数は名前、第2引数は親Widgetのパス名をとる。
+proc makeMenuButton {name parent} {
+    global conf
+    # 最初の1文字は大文字にする。
+    set first [string toupper [string range $name 0 0]]
+    set remain [string range $name 1 [string length $name]]
+    append label $first $remain
+    # puts "ラベル: $label"
+    
+    menubutton $parent.$name -ind true -relief flat -under 0 \
+	    -indicatoron false -fg $conf(fgcolor) -bg $conf(bgcolor) \
+	    -text $label -menu $parent.$name.menu
+    # -font $fontsize
+}
+
 # 接続ウインドウの定義
 proc popUpOpenCmd {} {
-    # 色の指定
-    set DFfgcolor black
-    set DFbgcolor "#C000DF00FF00"
-    set HLfgcolor white
-    set HLbgcolor blue
-    
+    global version conf host port dbname format comment
+
     toplevel .topen
     wm withdraw .
-    .topen configure -bg #C000DF00FF00   
+    .topen configure -bg $conf(bgcolor)
 
     # メニューバーの定義
-    frame .topen.menubar -bg $DFbgcolor
-    foreach i {file help} {
-	menubutton  .topen.menubar.$i -ind true -relief flat -under 0 \
-		-indicatoron false -fg $DFfgcolor -bg $DFbgcolor \
-		-text $i -menu .topen.menubar.$i.menu
-	# -font $fontsize
-    }
-
-    menu .topen.menubar.file.menu -fg $DFfgcolor -bg $DFbgcolor 
+    frame .topen.menubar -bg $conf(bgcolor)
+    makeMenuButton file .topen.menubar
+    makeMenuButton help .topen.menubar
+    
+    menu .topen.menubar.file.menu -fg $conf(fgcolor) -bg $conf(bgcolor)
     # -font $fontsize
     .topen.menubar.file.menu add command -label "Exit" -command {
 	destroy .
     }
-    menu .topen.menubar.help.menu -fg $DFfgcolor -bg $DFbgcolor 
+    menu .topen.menubar.help.menu -fg $conf(fgcolor) -bg $conf(bgcolor)
     # -font $fontsize
-    .topen.menubar.help.menu add command -label "help" -command {
-	toplevel .inithelp
-	message .inithelp.textmessage -width 500 -padx 1c -pady 1c -text {工事中
+    .topen.menubar.help.menu add command -label "About Kappa" -command {
+	copyright
+    }
+    pack .topen.menubar.file -side left
+    pack .topen.menubar.help -side right
+
+    label .topen.l0 -fg $conf(fgcolor) -bg $conf(bgcolor)  \
+	    -relief groove -text "Host"
+    label .topen.l1 -fg $conf(fgcolor) -bg $conf(bgcolor)  \
+	    -relief groove -text "Port"
+    label .topen.l2 -fg $conf(fgcolor) -bg $conf(bgcolor)  \
+	    -relief groove -text "DataBase Name"
+
+    entry .topen.e0 -fg $conf(fgcolor) -bg $conf(bgcolor)  \
+	    -width 24 -relief sunken -textvariable openhostdata
+    entry .topen.e1 -fg $conf(fgcolor) -bg $conf(bgcolor)  \
+	    -width 7 -relief sunken -textvariable openportdata
+    entry .topen.e2 -fg $conf(fgcolor) -bg $conf(bgcolor)  \
+	    -width 16 -relief sunken -textvariable openbasedata
+    
+    button .topen.button -fg $conf(fgcolor) -bg $conf(bgcolor)  \
+	    -bg $conf(hlcolor) -fg white -text "connect" -command {
+	set openentdata "tcp:${openhostdata}:${openportdata}"
+	
+	destroy .topen
+	#wm withdraw .topen
+	wm title . "検索画面 <${openhostdata}:${openbasedata}>"
+	Searchproc "open" $openentdata
+	
+	Searchproc "base" $openbasedata
+	wm deiconify .
+	focus .entEnter.inputentry
+    }
+    
+    # ------  リストボックスを作っている部分 (2つ) --------------
+    listbox .topen.li0 -fg $conf(fgcolor) -bg $conf(bgcolor)  \
+	    -relief groove -width 60 -height 17 \
+	    -yscrollcommand ".topen.s1 set" -xscrollcommand ".topen.s2 set"
+
+    set basedir [ file dirname [ info script ] ]
+    getDBInfo "$basedir/opensite"
+    # puts [parray comment]
+    set size [ array size comment ]
+    set i "0"
+    while { $i < $size-1 } {
+	.topen.li0 insert end "$comment($i)"
+	incr i
     }
 
-    button .inithelp.fin -text " Close Help " -command {destroy .inithelp}
-
-    pack .inithelp.textmessage  .inithelp.fin
-}
-pack .topen.menubar.file -side left
-pack .topen.menubar.help -side right
-
-label .topen.l0 -fg black -bg #C000DF00FF00  \
-	-relief groove -text "Host"
-label .topen.l1 -fg black -bg #C000DF00FF00  \
-	-relief groove -text "Port"
-label .topen.l2 -fg black -bg #C000DF00FF00  \
-	-relief groove -text "DataBase Name"
-
-entry .topen.e0 -fg black -bg #C000DF00FF00  \
-	-width 24 -relief sunken -textvariable openhostdata
-entry .topen.e1 -fg black -bg #C000DF00FF00  \
-	-width 7 -relief sunken -textvariable openportdata
-entry .topen.e2 -fg black -bg #C000DF00FF00  \
-	-width 16 -relief sunken -textvariable openbasedata
-    
-button .topen.button -fg black -bg #C000DF00FF00  \
-	-bg blue -fg white -text "connect" -command {
-    set openentdata "tcp:${openhostdata}:${openportdata}"
-    
-    destroy .topen
-    #wm withdraw .topen
-    wm title . ${openhostdata}:${openbasedata}
-    Searchproc "open" $openentdata
-    
-    Searchproc "base" $openbasedata
-    wm deiconify .
-    focus .entEnter.inputentry
-}
-# ------  リストボックスを作っている部分 (2つ) --------------
-
-listbox .topen.li0 -fg black -bg #C000DF00FF00  \
-	-relief groove -width 60 -height 17 \
-	-yscrollcommand ".topen.s1 set" -xscrollcommand ".topen.s2 set"
-global host
-global port
-global dbname
-global format
-global comment
-set basedir [ file dirname [ info script ] ]
-getDBInfo "$basedir/opensite"
-# puts [parray comment]
-set size [ array size comment ]
-set i "0"
-while { $i < $size-1 } {
-    .topen.li0 insert end "$comment($i)"
-    incr i
-}
-
-bind .topen.li0 <ButtonRelease-1> {
-    set id [ .topen.li0 curselection ]
-    inputOpenEntry "$host($id)" "$port($id)" "$dbname($id)"
-    if { [ string compare $format($id) "" ] } {
-	Searchproc "format" $format($id)
-	.showEnter.recordSyntax configure -text "$format($id)"
+    bind .topen.li0 <ButtonRelease-1> {
+	set id [ .topen.li0 curselection ]
+	inputOpenEntry "$host($id)" "$port($id)" "$dbname($id)"
+	if { [ string compare $format($id) "" ] } {
+	    Searchproc "format" $format($id)
+	    .showEnter.recordSyntax configure -text "$format($id)"
+	}
     }
-}
-#.topen.li0 insert 0 "aladdin (zwais)"
-#.topen.li0 insert 1 "AGRICOLA"
-#.topen.li0 insert 2 "dranet"
-#.topen.li0 insert 3 "Univercity of Wisconsin-madison"
+    #.topen.li0 insert 0 "aladdin (zwais)"
+    #.topen.li0 insert 1 "AGRICOLA"
+    #.topen.li0 insert 2 "dranet"
+    #.topen.li0 insert 3 "Univercity of Wisconsin-madison"
 
-    scrollbar .topen.s1 -bg #C000DF00FF00 \
+    scrollbar .topen.s1 -bg $conf(bgcolor) \
 	    -orient vertical  -command ".topen.li0 yview"
-    scrollbar .topen.s2 -bg #C000DF00FF00 \
+    scrollbar .topen.s2 -bg $conf(bgcolor) \
 	    -orient horizontal  -command ".topen.li0 xview"
     # -orient スクロールバーの向き  vertical 縦  horizontal 横
     
-#    button .topen.fin -fg black -bg #C000DF00FF00 \
-#	    -text "exit " -command {destroy .}
-#    .topen.fin conf -font "-*-*-*-*-*-24-*"
-    message .topen.m -fg black -bg #C000DF00FF00 -relief sunken -text ""
-    #    pack .topen.aladdin .topen.agricora .entEnter .topen.fin .topen.m
+    message .topen.m -fg $conf(fgcolor) -bg $conf(bgcolor) -relief sunken -text ""
 
     grid .topen.menubar -row 0 -column 0 -columnspan 4 -sticky ew
 
     grid .topen.l0 -row 1 -column 1 -sticky ew
     grid .topen.l1 -row 1 -column 2 -sticky ew
     grid .topen.l2 -row 1 -column 3 -sticky ew
-   
+    
     grid .topen.button -row 2 -column 0 -sticky ew
     grid .topen.e0 -row 2 -column 1 -sticky ew
     grid .topen.e1 -row 2 -column 2 -sticky ew
@@ -248,59 +269,41 @@ bind .topen.li0 <ButtonRelease-1> {
     grid columnconfigure .topen 1 -weight 100
     grid columnconfigure .topen 2 -weight 100
     grid columnconfigure .topen 3 -weight 100   
-    
-    #grid .topen.fin -row 4 -column 0 -columnspan 4 -sticky ew
-    #grid .topen.m -row 5 -column 0 -sticky ew
-    #button .topen.debag -text " show search window (デバック用) " -command {
-	#destroy .topen
-	#wm deiconify .
-	#}
-	#grid .topen.debag -row 4 -column 0 -columnspan 4 -sticky ew
-	
+
+    .topen configure -bd 2
+    wm title .topen "接続画面"
+    wm geometry .topen $conf(openGeometry)
 }
 
 # ------ entry フレームを宣言しているところ --------------------------------- 
 #set entdata ""
-frame .entEnter -bg #C000DF00FF00
-label .entEnter.inputlabel -fg black -bg #C000DF00FF00 -text " Query:" 
+frame .entEnter -bg $conf(bgcolor)
+label .entEnter.inputlabel -fg $conf(fgcolor) -bg $conf(bgcolor) -text " Query:" 
 #.entEnter.inputlabel conf -font "-*-*-*-*-*-20-*" 
-entry .entEnter.inputentry -fg white -bg blue \
+entry .entEnter.inputentry -fg white -bg $conf(hlcolor) \
 	-width 40 -relief sunken -textvariable entdata 
 #.entEnter.inputentry conf -font "-*-*-*-*-*-20-*"
-#-fg black -bg #C000DF00FF00
-button .entEnter.clear -fg black -bg #C000DF00FF00 -text clear -command {
+#-fg $conf(fgcolor) -bg $conf(bgcolor)
+button .entEnter.clear -fg $conf(fgcolor) -bg $conf(bgcolor) -text clear -command {
     .entEnter.inputentry delete 0 end
 }
 pack .entEnter.inputlabel .entEnter.inputentry  .entEnter.clear -in .entEnter -side left
 
-frame .showEnter -bg #C000DF00FF00
-label .showEnter.label1 -fg black -bg #C000DF00FF00  -text "\["
-label .showEnter.label2 -fg black -bg #C000DF00FF00  -text "\] No"
-label .showEnter.label3 -fg black -bg #C000DF00FF00  -text "〜 No"
-label .showEnter.label4 -fg black -bg #C000DF00FF00  -text "  "
-entry .showEnter.setno -fg black -bg #C000DF00FF00 \
+frame .showEnter -bg $conf(bgcolor)
+label .showEnter.label1 -fg $conf(fgcolor) -bg $conf(bgcolor)  -text "\["
+label .showEnter.label2 -fg $conf(fgcolor) -bg $conf(bgcolor)  -text "\] No"
+label .showEnter.label3 -fg $conf(fgcolor) -bg $conf(bgcolor)  -text "〜 No"
+label .showEnter.label4 -fg $conf(fgcolor) -bg $conf(bgcolor)  -text "  "
+entry .showEnter.setno -fg $conf(fgcolor) -bg $conf(bgcolor) \
 	-width 4 -relief sunken -textvariable setnodata
-entry  .showEnter.beginno -fg black -bg #C000DF00FF00  \
+entry  .showEnter.beginno -fg $conf(fgcolor) -bg $conf(bgcolor)  \
 	-width 6 -relief sunken -textvariable beginnodata
-entry .showEnter.endno -fg black -bg #C000DF00FF00  \
+entry .showEnter.endno -fg $conf(fgcolor) -bg $conf(bgcolor)  \
 	-width 6 -relief sunken -textvariable endnodata
 
-#menubutton  .showEnter.recordSyntax -ind true -relief raised\
-#        -text "usmarc" -menu .showEnter.recordSyntax.menu \
-#        -fg $DFfgcolor -bg $DFbgcolor 
-#        # -font $fontsize
-#menu .showEnter.recordSyntax.menu -fg $DFfgcolor -bg $DFbgcolor
-## -font $fontsize
-#foreach i {usmarc sutrs danmarc ukmarc grs1 soif summary explain} {
-#    .showEnter.recordSyntax.menu add command -label $i -command {
-#        .showEnter.recordSyntax configure -text $i
-#        Searchproc "format" $i
-#    }
-#}
-
 menubutton  .showEnter.recordSyntax -ind true -relief raised\
-	-text "USMARC" -menu .showEnter.recordSyntax.menu -fg black -bg #C000DF00FF00
-menu .showEnter.recordSyntax.menu -fg black -bg #C000DF00FF00
+	-text "USMARC" -menu .showEnter.recordSyntax.menu -fg $conf(fgcolor) -bg $conf(bgcolor)
+menu .showEnter.recordSyntax.menu -fg $conf(fgcolor) -bg $conf(bgcolor)
 .showEnter.recordSyntax.menu add command -label "USMARC" -command {
     .showEnter.recordSyntax configure -text "USMARC"
     Searchproc "format" "usmarc"
@@ -335,9 +338,9 @@ menu .showEnter.recordSyntax.menu -fg black -bg #C000DF00FF00
 }
 set element F
 radiobutton .showEnter.full -text "Full" -value F -variable element \
-	-bg #C000DF00FF00
+	-bg $conf(bgcolor)
 radiobutton .showEnter.burief -text "Brief" -value B  -variable element \
-	-bg #C000DF00FF00
+	-bg $conf(bgcolor)
 pack  .showEnter.label1  .showEnter.setno  .showEnter.label2 \
 	.showEnter.beginno  .showEnter.label3  .showEnter.endno \
 	.showEnter.label4 \
@@ -346,11 +349,10 @@ pack  .showEnter.label1  .showEnter.setno  .showEnter.label2 \
 # -------------------- entry フレームを宣言 終り--------------------------
 
 # -------------------- ボタンを宣言しているところ -----------------------
-button .open -fg white -bg blue -text connect -command {popUpOpenCmd}
-button .find -fg black -bg #C000DF00FF00 -text search -command {
-    .find configure -fg black -bg #C000DF00FF00
-    .entEnter.inputentry configure -fg black -bg #C000DF00FF00
-    .show configure -fg white -bg blue
+button .find -fg $conf(fgcolor) -bg $conf(bgcolor) -text Search -command {
+    .find configure -fg $conf(fgcolor) -bg $conf(bgcolor)
+    .entEnter.inputentry configure -fg $conf(fgcolor) -bg $conf(bgcolor)
+    .show configure -fg white -bg $conf(hlcolor)
     set lastline0 [.l0 index end]
     Searchproc "find" $entdata
     .l0 yview $lastline0
@@ -360,25 +362,25 @@ button .find -fg black -bg #C000DF00FF00 -text search -command {
 
 
 bind .entEnter.inputentry <KeyPress> {
-    .find configure -fg white -bg blue
-    .entEnter.inputentry configure -fg white -bg blue
-    .show configure -fg black -bg #C000DF00FF00
+    .find configure -fg white -bg $conf(hlcolor)
+    .entEnter.inputentry configure -fg white -bg $conf(hlcolor)
+    .show configure -fg $conf(fgcolor) -bg $conf(bgcolor)
 }
 
 bind .entEnter.inputentry <Key-Return> {
-    .find configure -fg black -bg #C000DF00FF00
-    .entEnter.inputentry configure -fg black -bg #C000DF00FF00
-    .show configure -fg white -bg blue
+    .find configure -fg $conf(fgcolor) -bg $conf(bgcolor)
+    .entEnter.inputentry configure -fg $conf(fgcolor) -bg $conf(bgcolor)
+    .show configure -fg white -bg $conf(hlcolor)
     set lastline0 [.l0 index end]
     Searchproc "find" $entdata
     #.entEnter.inputentry delete 0 end
     .l0 yview $lastline0
 }
-#button .show -fg black -bg #C000DF00FF00 -text show -command {popUpShowCmd}
-button .show  -fg black -bg #C000DF00FF00 -text show -command {
-    .show configure -fg black -bg #C000DF00FF00
-    .find configure -fg black -bg #C000DF00FF00
-    .entEnter.inputentry configure -fg white -bg blue
+#button .show -fg $conf(fgcolor) -bg $conf(bgcolor) -text show -command {popUpShowCmd}
+button .show  -fg $conf(fgcolor) -bg $conf(bgcolor) -text show -command {
+    .show configure -fg $conf(fgcolor) -bg $conf(bgcolor)
+    .find configure -fg $conf(fgcolor) -bg $conf(bgcolor)
+    .entEnter.inputentry configure -fg white -bg $conf(hlcolor)
     set lastline1 [.l1 index end]
     set count [expr ${endnodata}-${beginnodata}+1]
     Searchproc "elements" $element
@@ -386,94 +388,78 @@ button .show  -fg black -bg #C000DF00FF00 -text show -command {
     .l1 yview $lastline1
 }
 #メニューバーの定義 
-frame .menubar -bg $DFbgcolor
-foreach i {file connect help} {
-        menubutton  .menubar.$i -ind true -relief flat -under 0 \
-        -indicatoron false -fg $DFfgcolor -bg $DFbgcolor \
-	-text $i -menu .menubar.$i.menu
-        # -font $fontsize
-}
+frame .menubar -bg $conf(bgcolor)
+makeMenuButton file .menubar
+makeMenuButton connect .menubar
+makeMenuButton help .menubar
+
 pack .menubar.file .menubar.connect -side left
 pack .menubar.help -side right
 # メニューバーの定義 ここまで
 
 # ここから 各メニューの定義
 # file メニューの宣言
-menu .menubar.file.menu -fg black -bg #C000DF00FF00
+menu .menubar.file.menu -fg $conf(fgcolor) -bg $conf(bgcolor)
 # 以下 3行のコメントアウトを外すと、
 # 新しい接続ウインドウが接続を切らずに出てくる
 .menubar.file.menu add command -label "New Window" -command {
-     exec kappa.bin &
+    exec kappa.bin &
 }
 .menubar.file.menu add command -label "Exit" -command {
     Searchproc "quit" ""
 }
 
 # connect メニュー
-menu .menubar.connect.menu -fg black -bg #C000DF00FF00
+menu .menubar.connect.menu -fg $conf(fgcolor) -bg $conf(bgcolor)
 .menubar.connect.menu add command -label "Disconnect" -command {
     Searchproc "close" ""
 }
 # help メニュー
-menu .menubar.help.menu -fg black -bg #C000DF00FF00
-.menubar.help.menu add command -label "Query Example " -command {
+menu .menubar.help.menu -fg $conf(fgcolor) -bg $conf(bgcolor)
+.menubar.help.menu add command -label "About Query ..." -command {
+    toplevel .helpquery
 
-toplevel .queryexample
+    .helpquery configure -bg $conf(bgcolor)
+    message .helpquery.textmessage -bg $conf(bgcolor) -fg $conf(fgcolor) \
+	    -padx 1c -pady 1c -text {
+	「図書」を検索
+	図書
 
-message .queryexample.textmessage -width 500 -padx 1c -pady 1c -text {
-「図書」を検索
-      図書
+	「書名にガラス」を検索
+	ti="ガラス"
 
-「書名にガラス」を検索
-      ti="ガラス"
+	「著者名に鈴木」を検索
+	au="鈴木"
 
-「著者名に鈴木」を検索
-      au="鈴木"
+	1番目と2番目の検索結果集合のAND検索
+	set=1 and set=2
 
-1番目と2番目の検索結果集合のAND検索
-      set=1 and set=2
+    }
 
+    button .helpquery.fin -bg $conf(bgcolor) -fg $conf(fgcolor) \
+	    -text " Close " -command {destroy .helpquery}
+
+    pack .helpquery.textmessage  .helpquery.fin
 }
-
-button .queryexample.fin -text " Close Query Example " -command {destroy .queryexample}
-
-pack .queryexample.textmessage  .queryexample.fin
-
-
+.menubar.help.menu add command -label "About Kappa" -command {
+    copyright
 }
-#button .quit -fg black -bg #C000DF00FF00 \
-#	-text quit -command {Searchproc "quit" $entdata}
-
-
-
-#menubutton  .view_mb -ind true -relief flat -under 0  -indicatoron false\
-#	-text "view" -menu .view_mb.menu -fg black -bg #C000DF00FF00
-#menu .view_mb.menu -fg black -bg #C000DF00FF00
-#.view_mb.menu add command -label "Larg Font" -command {
-#.entEnter.inputlabel conf -font "-*-*-*-*-*-20-*" 
-#.entEnter.inputentry conf -font "-*-*-*-*-*-20-*"
-#}
-#.view_mb.menu add command -label "Normal Font" -command {
-#.entEnter.inputlabel conf -font "-user-medium-r-normal-m*-*-*-*-*-*-*-*-*"
-#.entEnter.inputentry conf -font "-*-*-*-*-*-14-*"
-#}
-# -------------------ボタンをを宣言 終り--------------------------
+# -------------------ボタンの宣言 終り--------------------------
 
 # ------  リストボックスを作っている部分 (2つ) --------------
-
-listbox .l0 -bg #C000DF00FF00 -fg black  \
+listbox .l0 -bg $conf(bgcolor) -fg $conf(fgcolor)  \
 	-relief groove -width 60 -height 5 \
 	-yscrollcommand ".s1 set" -xscrollcommand ".s2 set"
-scrollbar .s1 -bg #C000DF00FF00 \
+scrollbar .s1 -bg $conf(bgcolor) \
 	-orient vertical  -command ".l0 yview"
-scrollbar .s2 -bg #C000DF00FF00 \
+scrollbar .s2 -bg $conf(bgcolor) \
 	-orient horizontal  -command ".l0 xview"
 # -orient スクロールバーの向き  vertical 縦  horizontal 横
 
 # リストで指定すると、指定したところの show の履歴検索ができる
 # 指定したところ "@set number" が、検索エントリーに入力される (add 12/10)
 bind .l0 <ButtonRelease-1> {
-# show エントリー用 
+    # show エントリー用 
     set setnum [expr [.l0 curselection] + 1]
     set liststr [.l0 get [.l0 curselection]]
     set flagb [expr [string last ":" $liststr] + 1]
@@ -484,41 +470,39 @@ bind .l0 <ButtonRelease-1> {
     }
     inputShowEntry $setnum 1 $endnumber
 
-# 背景色の変更
-    .find configure -fg black -bg #C000DF00FF00
-    .entEnter.inputentry configure -fg black -bg #C000DF00FF00
-    .show configure -fg white -bg blue
+    # 背景色の変更
+    .find configure -fg $conf(fgcolor) -bg $conf(bgcolor)
+    .entEnter.inputentry configure -fg $conf(fgcolor) -bg $conf(bgcolor)
+    .show configure -fg white -bg $conf(hlcolor)
 }
 
 bind .l0 <ButtonRelease-3> {
     set setnum [expr [.l0 curselection] + 1]
-# 検索エントリー用
+    # 検索エントリー用
     set buf " set="
     set queryterm $buf$setnum
     .entEnter.inputentry insert insert $queryterm
 
-# 背景色の変更
-    .show configure -fg black -bg #C000DF00FF00
-    .entEnter.inputentry configure -fg white -bg blue
-    .find configure -fg white -bg blue
-
+    # 背景色の変更
+    .show configure -fg $conf(fgcolor) -bg $conf(bgcolor)
+    .entEnter.inputentry configure -fg white -bg $conf(hlcolor)
+    .find configure -fg white -bg $conf(hlcolor)
 }
 
-listbox .l1 -fg black -bg #C000DF00FF00 \
+listbox .l1 -fg $conf(fgcolor) -bg $conf(bgcolor) \
 	-relief groove -width 60 -height 14 \
 	-yscrollcommand ".s3 set" -xscrollcommand ".s4 set"
-scrollbar .s3 -bg #C000DF00FF00 \
+scrollbar .s3 -bg $conf(bgcolor) \
 	-orient vertical  -command ".l1 yview"
-scrollbar .s4 -bg #C000DF00FF00 \
+scrollbar .s4 -bg $conf(bgcolor) \
 	-orient horizontal  -command ".l1 xview"
 
 # ------  リストボックス 終り -------------------------
 
 # ------  メッセージ ----------------------------------
-message .m -fg black -bg #C000DF00FF00  -relief sunken -text ""
+message .m -fg $conf(fgcolor) -bg $conf(bgcolor)  -relief sunken -text ""
 # ------  メッセージ 終り ----------------------------------
 #----------------  配置   ----------------------
-#grid .open -row 0 -column 0 -columnspan 3 -sticky ew
 grid .menubar -row 0 -column 0 -columnspan 3 -sticky ew
 grid .find -row 1 -column 0 -columnspan 2 -sticky ew
 grid .entEnter -row 1 -column 2 -columnspan 2 -sticky ew
@@ -544,11 +528,10 @@ grid columnconfigure . 2 -weight 100
 
 popUpOpenCmd
 
-# デモ用にウィンドウのサイズ・位置を固定する。
 #    set mywidth [winfo width .topen]
 #    set myheight [winfo height .topen]
 #    puts [winfo geometry .]
 #    puts [winfo geometry .topen]
-wm geometry . 681x607+200+100
-wm geometry .topen 633x518+220+120
+. configure -bd 2
+wm geometry . $conf(searchGeometry)
 #-------------------  配置終り -------------------

@@ -1,3 +1,8 @@
+Mon Oct 11 12:40:23 1999  Yuka Egusa  <yuka@cosmo.ulis.ac.jp>
+
+	* client.{c,tcl.in},kappa: % kappa ZURL と指定したときには
+	検索画面が立ち上がるようにした。
+
 Wed Sep 29 16:48:17 1999  Masao Takaku  <masao@ulis.ac.jp>
 
 	* client.{c,tcl.in}: 検索結果表示欄(listbox)での'\t, '\n'を

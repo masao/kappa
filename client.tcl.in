@@ -103,6 +103,11 @@ proc inputShowEntry {setnum beginnum endnum} {
     .showEnter.endno insert 0 $endnum
 }
 
+#proc urlExtract {str host port dbname} {
+#    regexp {^z39.50s://([^/:]*):?([0-9]*)/(.*)$} $str match \
+#	    host port dbname
+#}
+
 # ホスト名などの情報を取得する。
 proc getDBInfo {filename} {
     global host port dbname format comment
@@ -116,12 +121,12 @@ proc getDBInfo {filename} {
     set id 0
     while { [ gets $infile line ] >= 0 } {
 	if { [ regexp {^z39.50s://([^/:]*):?([0-9]*)/([^#]*)#([^#]*)#?(.*)?$} $line match host($id) port($id) dbname($id) comment($id) format($id) ]} {
+	    if { ! [ string compare $port($id) "" ] } {
+		set port($id) $port(default)
+	    }
 	    #puts "$host($id) $port($id) $dbname($id)"
 	} else {
 	    continue
-	}
-	if { ! [ string compare $port($id) "" ] } {
-	    set port($id) $port(default)
 	}
 	incr id
     }
@@ -525,7 +530,7 @@ grid columnconfigure . 0 -weight 100
 grid columnconfigure . 1 -weight 100
 grid columnconfigure . 2 -weight 100
 
-popUpOpenCmd
+# popUpOpenCmd
 
 #    set mywidth [winfo width .topen]
 #    set myheight [winfo height .topen]

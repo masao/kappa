@@ -115,7 +115,7 @@ config.h.in configure configure.in install-sh missing mkinstalldirs
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 SOURCES = $(kappa_bin_SOURCES)
 OBJECTS = $(kappa_bin_OBJECTS)

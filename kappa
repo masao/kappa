@@ -13,9 +13,15 @@ if [ ! -x "$client" ]; then
     exit 1
 fi
 
-while true; do
+$client $*
+while test $? -ne 0; do
     $client
-    if [ $? -eq 0 ]; then
-	exit 0
-    fi
 done
+exit 0
+
+# while true; do
+#    $client $*
+#    if [ $? -eq 0 ]; then
+#	exit 0
+#    fi
+#done

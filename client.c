@@ -1181,17 +1181,19 @@ static void initialize(void)
 #endif
 }
 
-static int client(char *binary_path)
+static int client(int argc, char **argv)
 {
     Tk_Window	toplevel;
     char inTclFilename[BUFSIZE];
+    char buf[BUFSIZE];
+    char addr[BUFSIZE], dbname[BUFSIZE], host[BUFSIZE], port[BUFSIZE];
     strcpy(inTclFilename, DATA_DIR);
     strcat(inTclFilename, "/client.tcl");
 
     /* extracts from Tk_Main below */
 
     /* Initialize Tcl interpreter */
-    Tcl_FindExecutable(binary_path);
+    Tcl_FindExecutable(argv[0]);
     interp = Tcl_CreateInterp();
 
     /* parse options here if needed */
@@ -1218,6 +1220,28 @@ static int client(char *binary_path)
 	exit(1);
     }
 
+    if (argc == 1) {
+	Tcl_Eval(interp, "popUpOpenCmd");
+    } else {
+	if (sscanf(argv[1], "z39.50s://%[^/]/%s", addr, dbname) != 2) {
+	    fprintf(stderr, "ZURL invalid: %s\n", argv[1]);
+	    fprintf(stderr,"addr: %s, dbname: %s\n\n",addr, dbname);
+	    fprintf(stderr,"\tUsage:  kappa ZURL\n");
+	    fprintf(stderr,"\t\t(ZURL : z39.50s://host:port/dbname)\n");
+
+	    exit(1);
+	}
+	if (sscanf(addr, "%[^:]:%s", host, port) != 2) {
+	    strcpy(host, addr);
+	    strcpy(port,"210");
+	}
+	sprintf(buf, "Searchproc \"open\" tcp:%s:%s\n", host, port);
+	strcat(buf, "wm deiconify .\n");
+	strcat(buf, "focus .entEnter.inputentry\n");
+	sprintf(buf,"wm title . \"¸¡º÷²èÌÌ <%s:%s>\"\n",host, dbname);
+	Tcl_Eval(interp, buf);
+    }
+    
     /* Main Loop */
     Tk_MainLoop();
 
@@ -1378,7 +1402,7 @@ int main(int argc, char **argv)
     cmd_base("Default");
     printf("setNo[%d]>>",setnumber + 1);
 
-    return client(argv[0]);
+    return client(argc, argv);
 }
 
 void tclPrintf(char *str, int lnum)
